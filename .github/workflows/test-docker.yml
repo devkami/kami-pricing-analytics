@@ -1,13 +1,15 @@
 name: Docker Compose Tests
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_run:
+    workflows: ["Source Code Test"] 
+    branches: [master]
+    types:
+      - completed
 
 jobs:
   docker-compose-up:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
