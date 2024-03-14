@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 scraper_logger = logging.getLogger('scraper')
 
+
 class Scraper(ABC):
     def __init__(self, product_url: str):
         self.product_url = product_url

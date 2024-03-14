@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scraper"
-version = "0.1.0"
+version = "0.1.1"
 description = "API to scrap prices from competitors' products on especific marketplace"
 authors = ["Maicon de Menezes <maicondmenezes@gmail.com>"]
 readme = "README.md"
