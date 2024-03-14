@@ -1,0 +1,27 @@
+name: Docker Compose Tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  docker-compose-up:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and Start the Docker containers
+        run: docker-compose up --build -d
+      - name: Check if container is healthy
+        run: docker-compose ps
+      - name: Wait for container to be ready
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
+      - name: Test /scrap endpoint
+        run: |
+          curl --fail http://localhost:8001/scrap || exit 1
+      - name: Shut down the Docker containers
+        run: docker-compose down
