@@ -5,9 +5,9 @@ from fastapi import APIRouter, FastAPI, HTTPException
 from .scraper import ScraperFactory
 
 scraper_app = FastAPI(
-    title="KAMI-Pricing Scraper API",
+    title='KAMI-Pricing Scraper API',
     description="API to scrap prices from competitors' products on especific marketplace.",
-    version="0.1.0",
+    version='0.1.0',
 )
 api_router = APIRouter()
 
@@ -32,4 +32,4 @@ async def scrap_product(product_url: str):
 scraper_app.include_router(api_router, prefix='/api')
 app = FastAPI()
 
-app.mount("/api", scraper_app)
+app.mount('/api', scraper_app)
