@@ -38,8 +38,8 @@ Contributions are made to this repo via Issues and Pull Requests (PRs). A few ge
 
 Unsure where to begin contributing to the Kami Pricing Web Scraping Microservice? You can start by looking through these `beginner` and `help-wanted` issues:
 
-- [Beginner issues](https://link-to-your-repo/issues?q=label%3Abeginner) - issues that should only require a few lines of code, and a test or two.
-- [Help wanted issues](https://link-to-your-repo/issues?q=label%3A%22help+wanted%22) - issues that should be a bit more involved than `beginner` issues.
+- [Beginner issues](https://github.com/devkami/kami-pricing-scraper/issues?q=label%3Abeginner) - issues that should only require a few lines of code, and a test or two.
+- [Help wanted issues](https://github.com/devkami/kami-pricing-scraper/issues?q=label%3A%22help+wanted%22) - issues that should be a bit more involved than `beginner` issues.
 
 ### Getting started with a Pull Request
 
@@ -64,7 +64,7 @@ This checklist helps ensure that code contributions meet the project's standards
 
 ## Reporting bugs
 
-We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://link-to-your-repo/issues/new); it's that easy!
+We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/devkami/kami-pricing-scraper/issues/new); it's that easy!
 
 Write bug reports with detail, background, and sample code.
 
@@ -95,7 +95,3 @@ By contributing to the Kami Pricing Web Scraping Microservice, you agree that yo
 ## References
 
 This document was adapted from the open-source contribution guidelines for Facebook's Draft.js and the [Contributor Covenant](https://www.contributor-covenant.org/), version 1.4.
-
----
-
-Make sure to replace the placeholder links with actual URLs to your project's issue tracker and to update the guidelines according to your project's specific requirements and conventions.

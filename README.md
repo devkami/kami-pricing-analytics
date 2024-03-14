@@ -31,8 +31,9 @@ Follow these instructions to set up the project on your local machine for develo
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://yourrepository.com/web-scraping-microservice.git
-   cd web-scraping-microservice
+   git clone https://github.com/devkami/kami-pricing-scraper.git
+   cd kami-pricing-scraper
+
    ```
 
 2. **Install Dependencies:**
