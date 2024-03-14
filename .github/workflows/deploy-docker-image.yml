@@ -25,6 +25,7 @@ jobs:
       - name: Extract version from pyproject.toml
         id: get_version
         run: |
+          pip install toml
           echo "APP_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['tool']['poetry']['version'])")" >> $GITHUB_ENV
 
       - name: Build and push Docker image
