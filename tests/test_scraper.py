@@ -2,7 +2,11 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from scraper.scraper import BelezaNaWebScraper, ScraperFactory
+from scraper.scraper import (
+    BelezaNaWebScraper,
+    ScraperException,
+    ScraperFactory,
+)
 
 
 @pytest.mark.asyncio
@@ -52,8 +56,31 @@ def test_scraper_factory_returns_correct_scraper_for_belezanaweb():
 
 def test_scraper_factory_raises_error_for_unsupported_marketplace():
     product_url = 'https://www.unsupportedmarketplace.com/some-product'
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(ScraperException) as exc_info:
         ScraperFactory.get_scraper(product_url)
     assert 'Marketplace not supported' in str(
         exc_info.value
     ), 'ScraperFactory should raise ValueError for unsupported marketplaces.'
+
+
+@pytest.mark.asyncio
+async def test_belezanaweb_fetch_content_success(mocker):
+    expected_url = 'https://www.belezanaweb.com.br/some-product'
+    expected_response = '<html></html>'
+
+    mock_get_crawl_delay_async = mocker.patch(
+        'scraper.scraper.BelezaNaWebScraper._get_crawl_delay_async',
+        return_value=5,  # Mocked crawl delay
+    )
+
+    mocker.patch(
+        'httpx.AsyncClient.get', return_value=AsyncMock(text=expected_response)
+    )
+
+    scraper = BelezaNaWebScraper(expected_url)
+    content = await scraper.fetch_content()
+
+    mock_get_crawl_delay_async.assert_called_once()
+    assert (
+        content == expected_response
+    ), 'The fetch_content method should return the expected HTML content.'
