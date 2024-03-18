@@ -12,7 +12,7 @@ scraper_app = FastAPI(
 api_router = APIRouter()
 
 
-@scraper_app.post('/scrap/', response_model=List[Dict])
+@scraper_app.get('/scrap/', response_model=List[Dict])
 async def scrap_product(product_url: str):
     try:
 
