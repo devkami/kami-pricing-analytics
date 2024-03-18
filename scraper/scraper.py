@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 
 import httpx
 from bs4 import BeautifulSoup
+from pydantic import BaseModel, Field
 from robotexclusionrulesparser import RobotExclusionRulesParser as Robots
 
 from scraper.constants import DEFAULT_CRAWL_DELAY, DEFAULT_USER_AGENT
@@ -18,14 +19,14 @@ class ScraperException(Exception):
     pass
 
 
-@dataclass
-class Scraper(ABC):
+class Scraper(BaseModel, ABC):
     product_url: str
-    base_url: str = field(init=False)
-    robots_url: str = field(init=False)
-    crawl_delay: int = field(default=DEFAULT_CRAWL_DELAY)
+    base_url: str = Field(default='')
+    robots_url: str = Field(default='')
+    crawl_delay: int = Field(default=DEFAULT_CRAWL_DELAY)
 
-    def __post_init__(self):
+    def __init__(self, **data):
+        super().__init__(**data)
         self.base_url = self._get_base_url()
         self.robots_url = f'{self.base_url}/robots.txt'
         self._crawl_delay_fetched = False
@@ -62,7 +63,6 @@ class Scraper(ABC):
         pass
 
 
-@dataclass
 class BelezaNaWebScraper(Scraper):
     async def fetch_content(self) -> str:
         await self._ensure_crawl_delay()
@@ -100,6 +100,6 @@ class ScraperFactory:
     @staticmethod
     def get_scraper(product_url: str) -> Scraper:
         if 'belezanaweb' in product_url:
-            return BelezaNaWebScraper(product_url)
+            return BelezaNaWebScraper(product_url=product_url)
         else:
             raise ScraperException('Marketplace not supported')
