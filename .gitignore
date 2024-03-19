@@ -170,3 +170,5 @@ poetry.toml
 pyrightconfig.json
 
 poetry.lock
+
+codealike.json
