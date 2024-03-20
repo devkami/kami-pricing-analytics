@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "scraper"
-version = "0.1.3"
-description = "API to scrap prices from competitors' products on especific marketplace"
+name = "kami_pricing_analytics"
+version = "0.1.0"
+description = ""
 authors = ["Maicon de Menezes <maicondmenezes@gmail.com>"]
 readme = "README.md"
 
@@ -42,5 +42,5 @@ line_length = 79
 lint-review = "blue --check --diff . && isort --check --diff ."
 lint = "blue . && isort ."
 pre_test = "task lint"
-test = "pytest -s -x --cov=scraper -vv -rs"
+test = "pytest -s -x --cov=kami_pricing_analytics -vv -rs"
 post_test = "coverage html"

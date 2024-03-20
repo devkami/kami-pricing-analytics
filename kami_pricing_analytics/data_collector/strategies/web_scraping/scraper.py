@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
 from robotexclusionrulesparser import RobotExclusionRulesParser as Robots
 
-from scraper.constants import DEFAULT_CRAWL_DELAY, DEFAULT_USER_AGENT
+from .constants import DEFAULT_CRAWL_DELAY, DEFAULT_USER_AGENT
 
 scraper_logger = logging.getLogger('pricing-scraper')
 
