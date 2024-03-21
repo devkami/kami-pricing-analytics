@@ -35,5 +35,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            devkamico/kami-pricing-scraper:latest
-            devkamico/kami-pricing-scraper:${{ env.APP_VERSION }}
+            devkamico/kami-pricing-analytics:latest
+            devkamico/kami-pricing-analytics:${{ env.APP_VERSION }}

@@ -22,8 +22,8 @@ jobs:
         uses: jakejarvis/wait-action@master
         with:
           time: '10s'
-      - name: Test /scrap endpoint
+      - name: Test /research endpoint
         run: |
-          curl --fail http://localhost:8001/api/scrap || exit 1
+          curl --fail http://localhost:8001/api/research || exit 1
       - name: Shut down the Docker containers
         run: docker-compose down
