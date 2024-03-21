@@ -11,7 +11,11 @@ from pydantic import (
 )
 
 from kami_pricing_analytics.data_collector.collector import StrategyFactory
-from kami_pricing_analytics.schemas.options import StrategyOptions
+from kami_pricing_analytics.data_storage.repository import StorageFactory
+from kami_pricing_analytics.schemas.options import (
+    StorageOptions,
+    StrategyOptions,
+)
 
 
 class PricingResearch(BaseModel):
@@ -24,8 +28,11 @@ class PricingResearch(BaseModel):
         default_factory=lambda: datetime.now(tz=timezone.utc)
     )
     result: Dict[str, Any] = Field(default_factory=dict)
+    storage: Any = Field(default=None)
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True, arbitrary_types_allowed=True
+    )
 
     @field_validator('strategy')
     @classmethod
@@ -52,3 +59,36 @@ class PricingResearch(BaseModel):
 
     async def conduct_research(self):
         self.result = await self.strategy.execute()
+
+    def set_storage(self, storage_mode_option: int):
+        storage_mode_name = StorageOptions.get_storage_mode_name(
+            storage_mode_option
+        )
+        if storage_mode_name:
+            self.storage = StorageFactory.get_storage_mode(
+                storage_mode_name, **self.model_config
+            )
+        else:
+            raise ValueError(
+                f'Invalid storage mode option {storage_mode_option}. Available options are: {list(StorageOptions)}'
+            )
+
+    async def store_research(self):
+        """
+        Stores the research data using the configured storage object.
+        """
+        if not self.storage:
+            raise ValueError(
+                'Storage has not been set for this PricingResearch instance.'
+            )
+
+        research_data = {
+            'sku': self.sku,
+            'description': self.description,
+            'url': str(self.url),
+            'strategy': self.strategy,
+            'conducted_at': self.conducted_at,
+            'result': self.result,
+        }
+
+        await self.storage.save(data=research_data)

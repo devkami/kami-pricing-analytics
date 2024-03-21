@@ -55,9 +55,7 @@ class TestPricingResearch(unittest.IsolatedAsyncioTestCase):
     )
     async def test_success_conduct_research(self, mock_execute):
 
-        mock_execute.return_value = {
-            'key': 'value'
-        }  # Correctly set the return value
+        mock_execute.return_value = {'key': 'value'}
 
         instance = PricingResearch(**self.valid_data)
         instance.set_strategy(
@@ -66,6 +64,21 @@ class TestPricingResearch(unittest.IsolatedAsyncioTestCase):
         await instance.conduct_research()  # Use await here since conduct_research is async
 
         self.assertEqual(instance.result, {'key': 'value'})
+
+    @patch(
+        'kami_pricing_analytics.data_storage.repository.StorageFactory.get_storage_mode'
+    )
+    async def test_store_research_success(self, mock_get_storage_mode):
+        mock_storage = AsyncMock()
+        mock_storage.save = AsyncMock(return_value=None)
+
+        mock_get_storage_mode.return_value = mock_storage
+
+        instance = PricingResearch(**self.valid_data)
+        instance.set_storage(0)
+        await instance.store_research()
+
+        mock_storage.save.assert_awaited_once()
 
 
 if __name__ == '__main__':
