@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from fastapi import FastAPI, HTTPException, status, APIRouter
+from fastapi import APIRouter, FastAPI, HTTPException, status
 from pydantic import BaseModel
 
 from kami_pricing_analytics.schemas.options import StrategyOptions
@@ -12,6 +12,7 @@ research_app = FastAPI(
     version='0.1.0',
 )
 api_router = APIRouter()
+
 
 class ResearchRequest(BaseModel):
     product_url: str
@@ -40,6 +41,7 @@ async def research(product_data: ResearchRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail='An error occurred while scraping the product.',
         )
+
 
 research_app.include_router(api_router, prefix='/api')
 app = FastAPI()

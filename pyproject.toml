@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kami_pricing_analytics"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Maicon de Menezes <maicondmenezes@gmail.com>"]
 readme = "README.md"
