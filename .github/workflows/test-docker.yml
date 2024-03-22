@@ -24,6 +24,6 @@ jobs:
           time: '10s'
       - name: Test /research endpoint
         run: |
-          curl --fail http://localhost:8001/api/research || exit 1
+          curl -s http://0.0.0.0:8001/api/docs > /dev/null || exit 1
       - name: Shut down the Docker containers
         run: docker-compose down

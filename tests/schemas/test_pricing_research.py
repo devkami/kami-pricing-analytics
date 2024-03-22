@@ -41,7 +41,6 @@ class TestPricingResearch(unittest.IsolatedAsyncioTestCase):
     def test_success_define_web_scraping_strategy(self):
         instance = PricingResearch(url=self.valid_data['url'])
         instance.set_strategy(0)
-        print(f'instance: {instance}')
         self.assertIsInstance(instance.strategy, BelezaNaWebScraper)
 
     def test_failure_define_web_scraping_strategy(self):
