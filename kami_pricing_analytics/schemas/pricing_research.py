@@ -27,13 +27,13 @@ class PricingResearch(BaseModel):
     brand: str = Field(default=None)
     category: str = Field(default=None)
     url: HttpUrl
-    sellers: List[Dict] = Field(default=None)    
-    strategy_name: str = Field(default='web_scraping')   
-    
+    sellers: List[Dict] = Field(default=None)
+    strategy_name: str = Field(default='web_scraping')
+
     strategy: Any = Field(default=None)
     result: Dict[str, Any] = Field(default_factory=dict)
     storage: Any = Field(default=None)
-    
+
     model_config = ConfigDict(
         from_attributes=True, arbitrary_types_allowed=True
     )
@@ -75,7 +75,7 @@ class PricingResearch(BaseModel):
     async def conduct_research(self):
         self.result = await self.strategy.execute()
         self.update_research_data()
-    
+
     def set_storage(self, storage_mode_option: int):
         storage_mode_name = StorageOptions.get_storage_mode_name(
             storage_mode_option
@@ -96,7 +96,9 @@ class PricingResearch(BaseModel):
                 'Storage has not been set for this PricingResearch instance.'
             )
 
-        research_data = self.model_dump_json(exclude= {'strategy', 'storage', 'result', 'model_config'})
+        research_data = self.model_dump_json(
+            exclude={'strategy', 'storage', 'result', 'model_config'}
+        )
         research_data = json.loads(research_data)
         research_data['strategy'] = research_data.pop('strategy_name')
 
