@@ -1,0 +1,65 @@
+name: Integration Test
+
+on:
+  workflow_run:
+    workflows: ["Docker Compose Test"]
+    branches: [master]
+    types:
+      - completed
+  
+jobs:
+  integration-test:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build and start Docker containers
+      run: docker-compose up -d --build
+
+    - name: Wait for FastAPI to become available
+      run: |
+        until $(curl --output /dev/null --silent --head --fail http://localhost:8001/api/docs); do
+          printf '.'
+          sleep 5
+        done
+
+    - name: Get Post request response
+      env:
+        VALID_PRODUCT_URL: ${{ secrets.VALID_PRODUCT_URL }}
+      run: |
+        echo "RESEARCH_RESPONSE=$(curl -X POST http://localhost:8001/api/research -H \"Content-Type: application/json\" -d '{\"product_url\": \"${VALID_PRODUCT_URL}\", \"straresearch_strategy\": 0}')" >> $GITHUB_ENV
+        
+    - name: Check response status code
+      run: |
+        if [ $(echo $RESEARCH_RESPONSE | jq -r '.status') != "success" ]; then
+          echo "Integration test failed"
+          exit 1
+        fi 
+
+    - name: Check response data
+      run: |
+        if [ $(echo $RESEARCH_RESPONSE | jq -r '.data.product_url') != "${VALID_PRODUCT_URL}" ]; then
+          echo "Integration test failed"
+          exit 1
+        fi
+
+    - name: Check database record
+      env:
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_PORT: ${{ secrets.DB_PORT }}
+        VALID_PRODUCT_URL: ${{ secrets.VALID_PRODUCT_URL }}
+      run: |
+        export PGPASSWORD=${DB_PASSWORD}
+        QUERY_RESULT=$(docker exec kami-pricing-analytics_db_1 psql -h ${DB_HOST} -U ${DB_USER} -d ${DB_NAME} -c "SELECT COUNT(*) FROM pricing_research WHERE url='${VALID_PRODUCT_URL}';")
+        if ! echo ${QUERY_RESULT} | grep -q "1"; then
+          echo "Integration test failed: No record found for VALID_PRODUCT_URL in the database"
+          exit 1
+        fi
+
+    - name: Cleanup
+      run: docker-compose down
