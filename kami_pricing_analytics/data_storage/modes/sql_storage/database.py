@@ -1,4 +1,5 @@
 from typing import Any, AsyncGenerator, Dict, List, Type
+from contextlib import asynccontextmanager
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -20,6 +21,7 @@ class DatabaseConnection(BaseMode):
             class_=AsyncSession,
         )
 
+    @asynccontextmanager
     async def get_db_session(self) -> AsyncGenerator[AsyncSession, None]:
         """
         Provides a context manager that yields an async database session.

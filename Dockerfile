@@ -14,14 +14,15 @@ WORKDIR /usr/src/app
 COPY pyproject.toml ./
 
 RUN poetry config virtualenvs.create false && \
-poetry install --no-dev --no-interaction --no-ansi
+poetry install --only main --no-interaction --no-ansi
 
 COPY . .
 
-RUN chmod +x entrypoint.sh
-
 EXPOSE 8001
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+RUN chmod +x /usr/src/app/bash_scripts/entrypoint.sh
+RUN chmod +x /usr/src/app/bash_scripts/setup_alembic.sh
+
+ENTRYPOINT ["/usr/src/app/bash_scripts/entrypoint.sh"]
 
 CMD ["--host", "0.0.0.0", "--port", "8001", "--reload"]

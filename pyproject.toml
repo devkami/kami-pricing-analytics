@@ -14,6 +14,10 @@ uvicorn = "^0.28.0"
 robotexclusionrulesparser = "^1.7.1"
 sqlalchemy = "^2.0.28"
 pydantic-settings = "^2.2.1"
+alembic = "^1.13.1"
+taskipy = "^1.12.2"
+asyncpg = "^0.29.0"
+psycopg2-binary = "^2.9.9"
 
 [build-system]
 requires = ["poetry-core"]
@@ -24,7 +28,6 @@ pytest = "^7.3.1"
 pytest-cov = "^4.1.0"
 blue = "^0.9.1"
 isort = "^5.12.0"
-taskipy = "^1.11.0"
 ipython = "^8.14.0"
 ipykernel = "^6.23.1"
 notebook = "^6.5.4"
@@ -41,8 +44,12 @@ profile = "black"
 line_length = 79
 
 [tool.taskipy.tasks]
+migrate = "alembic upgrade head"
+makemigrations = "alembic revision --autogenerate -m 'auto_migration'"
 lint-review = "blue --check --diff . && isort --check --diff ."
 lint = "blue . && isort ."
 pre_test = "task lint"
 test = "pytest -s -x --cov=kami_pricing_analytics -vv -rs"
 post_test = "coverage html"
+show_tree = "tree -R -I '__pycache__' kami_pricing_analytics || echo 'tree command not available. Please install tree or use an equivalent command.'"
+setup_alembic = "bash bash_scripts/setup_alembic.sh"

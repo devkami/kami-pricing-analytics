@@ -21,7 +21,7 @@ class BelezaNaWebScraper(BaseScraper):
                 'sku': row['sku'],
                 'brand': row['brand'],
                 'category': row['category'],
-                'name': row['name'],
+                'description': row['name'],
                 'price': row['price'],
                 'seller_name': row['seller']['name'],
             }
