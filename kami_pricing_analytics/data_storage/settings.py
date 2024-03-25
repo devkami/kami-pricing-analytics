@@ -15,14 +15,12 @@ class DatabaseSettings(BaseSettings):
         env_file_encoding='utf-8',
     )
 
+class PostgreSQLSettings(DatabaseSettings):    
+    db_driver: str = 'postgresql+asyncpg'
+    db_port: int = Field(default=5432)
     @property
     def db_url(self):
         return f'{self.db_driver}://{self.db_user}:{self.db_password.get_secret_value()}@{self.db_host}:{self.db_port}/{self.db_name}'
-
-
-class PostgreSQLSettings(DatabaseSettings):
-    db_driver: str = 'postgresql+asyncpg'
-    db_port: int = Field(default=5432)
 
 
 class MySQLSettings(DatabaseSettings):
@@ -33,13 +31,17 @@ class MySQLSettings(DatabaseSettings):
 class SQLServerSettings(DatabaseSettings):
     db_driver: str = 'mssql+aiomssql'
     db_port: int = Field(default=1433)
-
+    
 
 class PLSQLSettings(DatabaseSettings):
     db_driver: str = 'oracle+cx_oracle'
     db_port: int = Field(default=1521)
 
 
-class SQLiteSettings(DatabaseSettings):
+class SQLiteSettings(DatabaseSettings):    
     db_driver: str = 'sqlite+aiosqlite'
     db_port: int = Field(default=0)
+    @property
+    def db_url(self):
+        db_url = self.db_name if self.db_name == ':memory:' else f'{self.db_name}.db'
+        return f'{self.db_driver}:///{db_url}'
