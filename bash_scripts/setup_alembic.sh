@@ -39,7 +39,7 @@ storage_config.read(storage_config_path)\n\
 storage_mode = storage_config.getint('storage', 'MODE')\n\n\
 # Dynamically set database settings based on storage mode\n\
 if storage_mode == StorageOptions.SQLITE.value:\n\
-    database_settings = SQLiteSettings()\n\
+    database_settings = SQLiteSettings(db_driver='sqlite')\n\
 elif storage_mode == StorageOptions.POSTGRESQL.value:\n\
     # Ensuring the db_driver is correctly set for PostgreSQLSettings\n\
     database_settings = PostgreSQLSettings(db_driver='postgresql')\n\
