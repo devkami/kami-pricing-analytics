@@ -38,7 +38,7 @@ jobs:
         echo "DB_PORT=5432" >> .env
 
     - name: Build and start Docker containers
-      run: docker-compose up -d web
+      run: docker-compose up -d pricing-analytics
 
     - name: Wait for FastAPI to become available
       run: |
@@ -60,6 +60,3 @@ jobs:
     
     - name: Cleanup
       run: docker-compose down
-
-volumes:
-  postgres_data:
