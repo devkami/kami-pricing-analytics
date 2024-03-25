@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Set storage mode to SQLite
+        run: echo "[storage]\nmode=0" > config/storage.cfg
       - name: Build and Start the Docker containers
         run: docker-compose up --build -d
       - name: Check if container is healthy
