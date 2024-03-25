@@ -34,18 +34,16 @@ jobs:
         echo "DB_USER=${{ secrets.DB_USER }}" >> .env
         echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
         echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-        echo "DB_HOST=localhost" >> .env
+        echo "DB_HOST=postgres" >> .env
         echo "DB_PORT=5432" >> .env
 
     - name: Build and start Docker containers
       run: docker-compose up -d pricing-analytics
 
-    - name: Wait for FastAPI to become available
+    - name: Check if container is healthy and running on the right port
       run: |
-        until $(curl --output /dev/null --silent --head --fail http://localhost:8001/api/docs); do
-          printf '.'
-          sleep 5
-        done
+        docker-compose ps
+        curl -s http://
 
     - name: Run Post VALID_PRODUCT_URL with web_scrap strategy Tests
       env:
