@@ -47,17 +47,17 @@ jobs:
           sleep 5
         done
 
-    - name: Run Integration Tests
+    - name: Run Post VALID_PRODUCT_URL with web_scrap strategy Tests
       env:
         VALID_PRODUCT_URL: ${{ secrets.VALID_PRODUCT_URL }}
       run: |
-        # Example POST request to the /research endpoint
-        RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X POST http://0.0.0.0:8001/api/research -H "Content-Type: application/json" -d '{"product_url": "${VALID_PRODUCT_URL}", "research_strategy": 0}')
+        # POST request to the /research endpoint
+        RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X POST http://localhost:8002/api/research -H "Content-Type: application/json" -d '{"product_url": "'"$VALID_PRODUCT_URL"'", "research_strategy": 0}')
         if [ "$RESPONSE" -ne "200" ]; then
           echo "Integration test failed: Response code $RESPONSE"
           exit 1
         fi
-
+    
     - name: Cleanup
       run: docker-compose down
 
