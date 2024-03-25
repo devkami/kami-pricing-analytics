@@ -51,15 +51,15 @@ jobs:
       env:
         VALID_PRODUCT_URL: ${{ secrets.VALID_PRODUCT_URL }}
       run: |
-        # Example POST request to the /research endpoint
+        # POST request to the /research endpoint
         RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X POST http://0.0.0.0:8001/api/research -H "Content-Type: application/json" -d '{"product_url": "${VALID_PRODUCT_URL}", "research_strategy": 0}')
         if [ "$RESPONSE" -ne "200" ]; then
           echo "Integration test failed: Response code $RESPONSE"
           exit 1
         fi
 
+        # Check if database has been updated
+        docker exec -it docker-compose-test_web_1 psql -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -c "SELECT * FROM pricing_research WHERE url='${VALID_PRODUCT_URL}'" | grep "${VALID_PRODUCT_URL}"
+
     - name: Cleanup
       run: docker-compose down
-
-volumes:
-  postgres_data:
