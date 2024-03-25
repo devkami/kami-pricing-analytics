@@ -2,7 +2,7 @@ name: Deploy to Docker Hub
 
 on:
   workflow_run:
-    workflows: ["Integration Test"] 
+    workflows: ["Docker Compose Test"] 
     branches: [master]
     types:
       - completed
