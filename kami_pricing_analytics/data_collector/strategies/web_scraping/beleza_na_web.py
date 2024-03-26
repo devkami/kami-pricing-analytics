@@ -23,6 +23,7 @@ class BelezaNaWebScraper(BaseScraper):
                 'category': row['category'],
                 'description': row['name'],
                 'price': row['price'],
+                'seller_id': row['seller']['id'],
                 'seller_name': row['seller']['name'],
             }
             sellers_list.append(seller_info)
