@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kami_pricing_analytics"
-version = "0.2.2"
+version = "0.3.2"
 description = "A Scalable FastAPI-based Pricing Analytics API for Research Data Management and Analysis"
 authors = ["Maicon de Menezes <maicondmenezes@gmail.com>"]
 readme = "README.md"
@@ -19,6 +19,9 @@ taskipy = "^1.12.2"
 asyncpg = "^0.29.0"
 psycopg2-binary = "^2.9.9"
 aiosqlite = "^0.20.0"
+selenium = "^4.18.1"
+webdriver-manager = "^4.0.1"
+selenium-stealth = "^1.0.6"
 
 [build-system]
 requires = ["poetry-core"]

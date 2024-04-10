@@ -18,6 +18,7 @@ class BaseStrategy(BaseModel, ABC):
     """
 
     product_url: HttpUrl
+    sku: str = None
     """The URL of the product or resource the strategy is designed to handle."""
 
     @abstractmethod
