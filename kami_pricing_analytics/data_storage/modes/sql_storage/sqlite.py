@@ -10,9 +10,10 @@ from kami_pricing_analytics.data_storage.modes.sql_storage.models import (
 )
 from kami_pricing_analytics.data_storage.settings import SQLiteSettings
 
+
 class SQLiteConnection(DatabaseConnection):
     def __init__(self, settings: SQLiteSettings):
-        super().__init__(settings=settings)    
+        super().__init__(settings=settings)
 
     async def save(
         self,
