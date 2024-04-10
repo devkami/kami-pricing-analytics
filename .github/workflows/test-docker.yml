@@ -19,12 +19,28 @@ jobs:
       - name: Build and Start the Docker containers
         run: docker-compose up --build -d
       - name: Check if container is healthy
-        run: docker-compose ps
-      - name: Wait for container to be ready
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '10s'
-      - name: Test /research endpoint
+        run: |
+          max_attempts=120
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            health_status=$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose ps -q pricing-analytics))
+            echo "Attempt $attempt: Container Health Status - $health_status"
+            if [ "$health_status" == "healthy" ]; then
+              echo "Healthy Container!"
+              break
+            fi
+            attempt=$((attempt + 1))
+            sleep 1
+          done
+                 if [ $attempt -gt $max_attempts ]; then
+            echo "Container not healthy after $max_attempts attempts."
+            exit 1
+          fi
+
+      - name: Wait for application to be ready or timeout
+        run: |
+          timeout 80 bash -c 'while ! docker-compose logs -f | grep -m1 "Application startup complete."; do sleep 1; done && echo "Application is ready!"'      
+      - name: Test /api/docs endpoint
         run: |
           curl -s http://0.0.0.0:8001/api/docs > /dev/null || exit 1
       - name: Shut down the Docker containers
