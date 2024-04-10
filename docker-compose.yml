@@ -13,6 +13,12 @@ services:
       DB_NAME: ${DB_NAME}
       DB_HOST: ${DB_HOST:-db}
       DB_PORT: ${DB_PORT:-5432}
+    healthcheck:
+      test: ["CMD", "bash", "bash_scripts/healthcheck.sh"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 80s      
 
 volumes:
   data:

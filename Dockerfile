@@ -6,6 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE 1
 
 #Prepare the environment
 RUN apt update && \
+apt install -y curl && \
+rm -rf /var/lib/apt/lists/* && \
 pip install --no-cache-dir --upgrade pip && \
 pip install poetry
 
