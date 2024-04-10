@@ -1,3 +1,6 @@
+from kami_pricing_analytics.data_collector.strategies.web_scraping.amazon import (
+    AmazonScraper,
+)
 from kami_pricing_analytics.data_collector.strategies.web_scraping.base_scraper import (
     BaseScraper,
 )
@@ -13,6 +16,10 @@ class StrategyFactory:
             if 'belezanaweb' in product_url:
                 return BelezaNaWebScraper(
                     product_url=product_url, logger_name='belezanaweb-scraper'
+                )
+            if 'amazon' in product_url:
+                return AmazonScraper(
+                    product_url=product_url, logger_name='amazon-scraper'
                 )
 
         raise ValueError('Unsupported strategy')
