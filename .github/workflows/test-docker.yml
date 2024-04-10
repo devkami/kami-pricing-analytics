@@ -20,7 +20,8 @@ jobs:
         run: docker-compose up --build -d
       - name: Check if container is healthy
         run: |
-          max_attempts=120
+          sleep 80
+          max_attempts=40
           attempt=1
           while [ $attempt -le $max_attempts ]; do
             health_status=$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose ps -q pricing-analytics))
@@ -36,10 +37,6 @@ jobs:
             echo "Container not healthy after $max_attempts attempts."
             exit 1
           fi
-
-      - name: Wait for application to be ready or timeout
-        run: |
-          timeout 80 bash -c 'while ! docker-compose logs -f | grep -m1 "Application startup complete."; do sleep 1; done && echo "Application is ready!"'      
       - name: Test /api/docs endpoint
         run: |
           curl -s http://0.0.0.0:8001/api/docs > /dev/null || exit 1
