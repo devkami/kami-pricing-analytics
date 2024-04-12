@@ -55,9 +55,6 @@ echo "Cleaning up browser files..."
 cd ../../
 rm -rf browser/
 
-# Setup alembic
-./bash_scripts/setup_alembic.sh
-
 # Install main dependencies with poetry
 echo "Installing main dependencies..."
 poetry install --only main --no-interaction --no-ansi

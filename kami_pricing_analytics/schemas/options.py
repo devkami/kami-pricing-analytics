@@ -12,16 +12,3 @@ class StrategyOptions(Enum):
             cls.GOOGLE_SHOPPING.value: 'google_shopping',
         }
         return strategy_mapping.get(value, None)
-
-
-class StorageOptions(Enum):
-    SQLITE = 0
-    POSTGRESQL = 1
-
-    @classmethod
-    def get_storage_mode_name(cls, value):
-        storage_mapping = {
-            cls.SQLITE.value: 'sqlite',
-            cls.POSTGRESQL.value: 'postgresql',
-        }
-        return storage_mapping.get(value, None)

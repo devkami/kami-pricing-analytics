@@ -5,15 +5,20 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import DeclarativeMeta, sessionmaker
 
-from kami_pricing_analytics.data_storage.modes.base_mode import BaseMode
-from kami_pricing_analytics.data_storage.settings import DatabaseSettings
+from kami_pricing_analytics.data_storage.modes.database.relational.models import (
+    PricingResearchModel,
+)
+from kami_pricing_analytics.data_storage.modes.database.relational.settings import (
+    DatabaseSettings,
+)
+from kami_pricing_analytics.data_storage.storage_base import DataStoreBase
 
 
-class DatabaseConnection(BaseMode):
+class DatabaseStorage(DataStoreBase):
     def __init__(self, settings: DatabaseSettings):
-        super().__init__(**settings.dict(exclude={'db_driver'}))
+        super().__init__(**settings.model_dump(exclude={'driver'}))
 
-        self._engine = create_async_engine(settings.db_url, echo=True)
+        self._engine = create_async_engine(settings.url, echo=True)
         self._SessionLocal = sessionmaker(
             autocommit=False,
             autoflush=False,
@@ -22,7 +27,7 @@ class DatabaseConnection(BaseMode):
         )
 
     @asynccontextmanager
-    async def get_db_session(self) -> AsyncGenerator[AsyncSession, None]:
+    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """
         Provides a context manager that yields an async database session.
         """
@@ -30,29 +35,33 @@ class DatabaseConnection(BaseMode):
             yield session
 
     async def save(
-        self, model: Type[DeclarativeMeta], data: Dict[str, Any]
+        self,
+        data: Dict[str, Any],
+        model: Type[DeclarativeMeta] = PricingResearchModel,
     ) -> Any:
-        async with self.get_db_session() as session:
+        async with self.get_session() as session:
             instance = model(**data)
             session.add(instance)
             await session.commit()
             return instance
 
     async def retrieve(
-        self, model: Type[DeclarativeMeta], criteria: Dict[str, Any] = {}
+        self,
+        model: Type[DeclarativeMeta] = PricingResearchModel,
+        criteria: Dict[str, Any] = {},
     ) -> List[Any]:
-        async with self.get_db_session() as session:
+        async with self.get_session() as session:
             query = select(model).filter_by(**criteria)
             result = await session.execute(query)
             return result.scalars().all()
 
     async def update(
         self,
-        model: Type[DeclarativeMeta],
         criteria: Dict[str, Any],
         data: Dict[str, Any],
+        model: Type[DeclarativeMeta] = PricingResearchModel,
     ) -> None:
-        async with self.get_db_session() as session:
+        async with self.get_session() as session:
             stmt = (
                 update(model)
                 .filter_by(**criteria)
@@ -63,9 +72,11 @@ class DatabaseConnection(BaseMode):
             await session.commit()
 
     async def delete(
-        self, model: Type[DeclarativeMeta], criteria: Dict[str, Any]
+        self,
+        criteria: Dict[str, Any],
+        model: Type[DeclarativeMeta] = PricingResearchModel,
     ) -> None:
-        async with self.get_db_session() as session:
+        async with self.get_session() as session:
             stmt = (
                 delete(model)
                 .filter_by(**criteria)

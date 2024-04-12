@@ -23,7 +23,6 @@ COPY . .
 EXPOSE 8001
 
 RUN chmod +x /usr/src/app/bash_scripts/entrypoint.sh
-RUN chmod +x /usr/src/app/bash_scripts/setup_alembic.sh
 
 ENTRYPOINT ["/usr/src/app/bash_scripts/entrypoint.sh"]
 

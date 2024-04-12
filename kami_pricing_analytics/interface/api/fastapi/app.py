@@ -1,12 +1,11 @@
+import configparser
+import os
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, BackgroundTasks, FastAPI, HTTPException, status
 from pydantic import BaseModel
 
-from kami_pricing_analytics.schemas.options import (
-    StorageOptions,
-    StrategyOptions,
-)
+from kami_pricing_analytics.schemas.options import StrategyOptions
 from kami_pricing_analytics.schemas.pricing_research import PricingResearch
 
 research_app = FastAPI(
@@ -15,6 +14,11 @@ research_app = FastAPI(
     version='0.2.1',
 )
 api_router = APIRouter()
+
+settings_path = os.path.join('config', 'settings.cfg')
+settings = configparser.ConfigParser()
+settings.read(settings_path)
+storage_mode = settings.getint('storage', 'MODE')
 
 
 class ResearchRequest(BaseModel):
@@ -33,9 +37,7 @@ async def research(
     try:
         pricing_research = PricingResearch(url=product_data.product_url)
         pricing_research.set_strategy(product_data.research_strategy)
-        pricing_research.set_storage(
-            storage_mode_option=StorageOptions.POSTGRESQL.value
-        )
+        pricing_research.set_storage(mode_option=storage_mode)
 
         await pricing_research.conduct_research()
 

@@ -1,22 +1,14 @@
 import json
-from datetime import datetime, timezone
 from typing import Any, Dict, List
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    HttpUrl,
-    Json,
-    field_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 from kami_pricing_analytics.data_collector.collector import StrategyFactory
-from kami_pricing_analytics.data_storage.repository import StorageFactory
-from kami_pricing_analytics.schemas.options import (
-    StorageOptions,
-    StrategyOptions,
+from kami_pricing_analytics.data_storage.storage_factory import (
+    StorageFactory,
+    StorageModeOptions,
 )
+from kami_pricing_analytics.schemas.options import StrategyOptions
 
 
 class PricingResearch(BaseModel):
@@ -76,15 +68,13 @@ class PricingResearch(BaseModel):
         self.result = await self.strategy.execute()
         self.update_research_data()
 
-    def set_storage(self, storage_mode_option: int):
-        storage_mode_name = StorageOptions.get_storage_mode_name(
-            storage_mode_option
-        )
-        if storage_mode_name:
-            self.storage = StorageFactory.get_storage_mode(storage_mode_name)
+    def set_storage(self, mode_option: StorageModeOptions):
+        storage_mode = StorageFactory.get_mode(mode_option)
+        if storage_mode:
+            self.storage = storage_mode
         else:
             raise ValueError(
-                f'Invalid storage mode option {storage_mode_option}. Available options are: {list(StorageOptions)}'
+                f'Invalid storage mode option {mode_option}. Available options are: {list(StorageModeOptions)}'
             )
 
     async def store_research(self):
