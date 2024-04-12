@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kami_pricing_analytics"
-version = "0.3.2"
+version = "0.3.3"
 description = "A Scalable FastAPI-based Pricing Analytics API for Research Data Management and Analysis"
 authors = ["Maicon de Menezes <maicondmenezes@gmail.com>"]
 readme = "README.md"
@@ -55,4 +55,3 @@ pre_test = "task lint"
 test = "pytest -s -x --cov=kami_pricing_analytics -vv -rs"
 post_test = "coverage html"
 show_tree = "tree -R -I '__pycache__' kami_pricing_analytics || echo 'tree command not available. Please install tree or use an equivalent command.'"
-setup_alembic = "bash bash_scripts/setup_alembic.sh"
