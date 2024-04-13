@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kami_pricing_analytics"
-version = "0.3.3"
+version = "0.3.4"
 description = "A Scalable FastAPI-based Pricing Analytics API for Research Data Management and Analysis"
 authors = ["Maicon de Menezes <maicondmenezes@gmail.com>"]
 readme = "README.md"
@@ -41,6 +41,7 @@ pytest-mock = "^3.12.0"
 [tool.pytest.ini_options]
 pythonpath = "."
 addopts = "--doctest-modules"
+norecursedirs = ["migrations"]
 
 [tool.isort]
 profile = "black"
@@ -48,10 +49,10 @@ line_length = 79
 
 [tool.taskipy.tasks]
 migrate = "alembic upgrade head"
-makemigrations = "alembic revision --autogenerate -m 'auto_migration'"
+makemigrations = "alembic revision --autogenerate"
 lint-review = "blue --check --diff . && isort --check --diff ."
 lint = "blue . && isort ."
 pre_test = "task lint"
 test = "pytest -s -x --cov=kami_pricing_analytics -vv -rs"
 post_test = "coverage html"
-show_tree = "tree -R -I '__pycache__' kami_pricing_analytics || echo 'tree command not available. Please install tree or use an equivalent command.'"
+show_tree = "tree -R -I '__pycache__' . || echo 'tree command not available. Please install tree or use an equivalent command.'"
