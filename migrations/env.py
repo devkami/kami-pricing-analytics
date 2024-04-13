@@ -1,16 +1,18 @@
-import os
 import configparser
-
+import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
-from kami_pricing_analytics.data_storage.storage_factory import DatabaseSettingsFactory
-from kami_pricing_analytics.data_storage.modes.database.relational.models import Base
-from kami_pricing_analytics.data_storage.storage_factory import StorageModeOptions
+from kami_pricing_analytics.data_storage.modes.database.relational.models import (
+    Base,
+)
+from kami_pricing_analytics.data_storage.storage_factory import (
+    DatabaseSettingsFactory,
+    StorageModeOptions,
+)
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -21,22 +23,25 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Load storage configuration
-settings_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'settings.cfg')
+settings_path = os.path.join(
+    os.path.dirname(__file__), '..', 'config', 'settings.cfg'
+)
 settings = configparser.ConfigParser()
 settings.read(settings_path)
 storage_mode = settings.getint('storage', 'MODE')
 storage_mode_option = StorageModeOptions(storage_mode)
 
-database_settings = DatabaseSettingsFactory.get_settings(mode=storage_mode_option)()
+database_settings = DatabaseSettingsFactory.get_settings(
+    mode=storage_mode_option
+)()
 
-#remove Async library from driver
+# remove Async library from driver
 database_settings.db_driver = database_settings.db_driver.split('+')[0]
 
 # Dynamically set the SQLAlchemy URL
 config.set_main_option('sqlalchemy.url', database_settings.db_url)
 
 target_metadata = Base.metadata
-
 
 
 def run_migrations_offline() -> None:
@@ -51,12 +56,12 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = config.get_main_option('sqlalchemy.url')
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        dialect_opts={'paramstyle': 'named'},
     )
 
     with context.begin_transaction():
@@ -72,7 +77,7 @@ def run_migrations_online() -> None:
     """
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+        prefix='sqlalchemy.',
         poolclass=pool.NullPool,
     )
 
