@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from kami_pricing_analytics.schemas.options import StrategyOptions
 from kami_pricing_analytics.schemas.pricing_research import PricingResearch
-
+from kami_pricing_analytics.data_storage.storage_factory import StorageModeOptions
 research_app = FastAPI(
     title='KAMI-Pricing Analytics API',
     description="API to conduct pricing research over a product's URL.",
@@ -18,7 +18,8 @@ api_router = APIRouter()
 settings_path = os.path.join('config', 'settings.cfg')
 settings = configparser.ConfigParser()
 settings.read(settings_path)
-storage_mode = settings.getint('storage', 'MODE')
+storage_mode = StorageModeOptions(settings.getint('storage', 'MODE'))  # Convert to Enum
+
 
 
 class ResearchRequest(BaseModel):
