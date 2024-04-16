@@ -1,6 +1,6 @@
 version: '3.8'
 
-services:     
+services:
   pricing-analytics:
     build: .
     ports:
@@ -13,14 +13,14 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
-      DB_HOST: ${DB_HOST:-db}
-      DB_PORT: ${DB_PORT:-5432}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
     healthcheck:
       test: ["CMD", "bash", "bash_scripts/healthcheck.sh"]
       interval: 30s
       timeout: 30s
       retries: 5
-      start_period: 80s      
-
+      start_period: 80s
+      
 volumes:
   data:

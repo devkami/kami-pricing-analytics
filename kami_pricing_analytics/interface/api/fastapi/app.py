@@ -7,7 +7,11 @@ from pydantic import BaseModel
 
 from kami_pricing_analytics.schemas.options import StrategyOptions
 from kami_pricing_analytics.schemas.pricing_research import PricingResearch
-from kami_pricing_analytics.data_storage.storage_factory import StorageModeOptions
+from kami_pricing_analytics.data_storage.storage_factory import (
+    StorageModeOptions,
+)
+import logging
+
 research_app = FastAPI(
     title='KAMI-Pricing Analytics API',
     description="API to conduct pricing research over a product's URL.",
@@ -18,8 +22,7 @@ api_router = APIRouter()
 settings_path = os.path.join('config', 'settings.cfg')
 settings = configparser.ConfigParser()
 settings.read(settings_path)
-storage_mode = StorageModeOptions(settings.getint('storage', 'MODE'))  # Convert to Enum
-
+storage_mode = StorageModeOptions(settings.getint('storage', 'MODE'))
 
 
 class ResearchRequest(BaseModel):
@@ -50,6 +53,7 @@ async def research(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
     except Exception as e:
+        logging.error(f'Unexpected error: {str(e)}', exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail='An error occurred while scraping the product.',

@@ -1,4 +1,4 @@
-from pydantic import ConfigDict, Field, SecretStr
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings
 
 
@@ -10,16 +10,6 @@ class DatabaseSettings(BaseSettings):
     db_port: int
     db_driver: str
 
-    model_config = ConfigDict(
-        env_file='.env',
-        env_file_encoding='utf-8',
-    )
-
     @property
     def db_url(self) -> str:
-        password = (
-            self.password.get_secret_value()
-            if hasattr(self.password, 'get_secret_value')
-            else self.password
-        )
-        return f'{self.driver}://{self.user}:{password}@{self.host}:{self.port}/{self.name}'
+        return f'{self.db_driver}://{self.db_user}:{self.db_password.get_secret_value()}@{self.db_host}:{self.db_port}/{self.db_name}'

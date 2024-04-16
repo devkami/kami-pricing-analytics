@@ -12,10 +12,14 @@ class SQLiteSettings(DatabaseSettings):
 
     @property
     def db_url(self):
-        db_url = self.db_name if self.db_name == ':memory:' else f'{self.db_name}.db'
+        db_url = (
+            self.db_name
+            if self.db_name == ':memory:'
+            else f'{self.db_name}.db'
+        )
         return f'{self.db_driver}:///{db_url}'
 
 
 class SQLiteStorage(DatabaseStorage):
     def __init__(self, settings: SQLiteSettings):
-        super().__init__(settings)
+        super().__init__(settings=settings)

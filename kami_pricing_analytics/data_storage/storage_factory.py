@@ -37,20 +37,31 @@ class StorageModeOptions(Enum):
 
 class StorageFactory:
     storage_mapping: Dict[StorageModeOptions, Type[DataStoreBase]] = {}
+    settings_mapping: Dict[StorageModeOptions, Type[DatabaseSettings]] = {}
 
     @classmethod
     def register_mode(
-        cls, mode: StorageModeOptions, storage: Type[DataStoreBase]
+        cls,
+        mode: StorageModeOptions,
+        storage: Type[DataStoreBase],
+        settings: Type[DatabaseSettings],
     ):
         cls.storage_mapping[mode] = storage
+        cls.settings_mapping[mode] = settings
 
     @classmethod
     def get_mode(cls, mode: StorageModeOptions) -> Type[DataStoreBase]:
-        storage_mode = cls.storage_mapping.get(mode)
-        if storage_mode is None:
+        if (
+            mode not in cls.storage_mapping
+            and mode not in cls.settings_mapping
+        ):
             raise ValueError(
                 f'Unsupported STORAGE_MODE: {mode}. Available options: {StorageModeOptions.__members__}'
             )
+        settings_class = cls.settings_mapping.get(mode)
+        settings = settings_class()
+        storage_class = cls.storage_mapping.get(mode)
+        storage_mode = storage_class(settings=settings)
         return storage_mode
 
 
@@ -73,12 +84,6 @@ class DatabaseSettingsFactory:
         return settings
 
 
-StorageFactory.register_mode(StorageModeOptions.SQLITE, SQLiteStorage)
-StorageFactory.register_mode(StorageModeOptions.POSTGRESQL, PostgreSQLStorage)
-StorageFactory.register_mode(StorageModeOptions.MYSQL, MySQLStorage)
-StorageFactory.register_mode(StorageModeOptions.SQLSERVER, SQLServerStorage)
-StorageFactory.register_mode(StorageModeOptions.PLSQL, PLSQLStorage)
-
 DatabaseSettingsFactory.register_settings(
     StorageModeOptions.SQLITE, SQLiteSettings
 )
@@ -93,4 +98,20 @@ DatabaseSettingsFactory.register_settings(
 )
 DatabaseSettingsFactory.register_settings(
     StorageModeOptions.PLSQL, PLSQLSettings
+)
+
+StorageFactory.register_mode(
+    StorageModeOptions.SQLITE, SQLiteStorage, SQLiteSettings
+)
+StorageFactory.register_mode(
+    StorageModeOptions.POSTGRESQL, PostgreSQLStorage, PostgreSQLSettings
+)
+StorageFactory.register_mode(
+    StorageModeOptions.MYSQL, MySQLStorage, MySQLSettings
+)
+StorageFactory.register_mode(
+    StorageModeOptions.SQLSERVER, SQLServerStorage, SQLServerSettings
+)
+StorageFactory.register_mode(
+    StorageModeOptions.PLSQL, PLSQLStorage, PLSQLSettings
 )
