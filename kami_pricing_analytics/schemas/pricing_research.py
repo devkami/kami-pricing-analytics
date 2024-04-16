@@ -9,6 +9,7 @@ from kami_pricing_analytics.data_storage.storage_factory import (
     StorageModeOptions,
 )
 from kami_pricing_analytics.schemas.options import StrategyOptions
+import logging
 
 
 class PricingResearch(BaseModel):
@@ -18,7 +19,7 @@ class PricingResearch(BaseModel):
     description: str = Field(default=None)
     brand: str = Field(default=None)
     category: str = Field(default=None)
-    url: HttpUrl
+    url: HttpUrl = Field()
     sellers: List[Dict] = Field(default=None)
     strategy_name: str = Field(default='web_scraping')
 
@@ -61,7 +62,6 @@ class PricingResearch(BaseModel):
             self.description = result[0].get('description')
             self.brand = result[0].get('brand')
             self.category = result[0].get('category')
-            self.url = str(self.url)
             self.sellers = result
 
     async def conduct_research(self):
@@ -69,13 +69,14 @@ class PricingResearch(BaseModel):
         self.update_research_data()
 
     def set_storage(self, mode_option: StorageModeOptions):
-        storage_mode = StorageFactory.get_mode(mode_option)
-        if storage_mode:
-            self.storage = storage_mode
-        else:
+        try:
+            self.storage = StorageFactory.get_mode(mode_option)
+        except ValueError as e:
             raise ValueError(
-                f'Invalid storage mode option {mode_option}. Available options are: {list(StorageModeOptions)}'
+                f'Error setting storage mode: {e}. Available options are: {list(StorageModeOptions)}'
             )
+        except Exception as e:
+            raise ValueError(f'Unexpected error setting storage mode: {e}')
 
     async def store_research(self):
         """
@@ -91,5 +92,5 @@ class PricingResearch(BaseModel):
         )
         research_data = json.loads(research_data)
         research_data['strategy'] = research_data.pop('strategy_name')
-
+        logging.info(f'Storing research data: {research_data}')
         await self.storage.save(data=research_data)

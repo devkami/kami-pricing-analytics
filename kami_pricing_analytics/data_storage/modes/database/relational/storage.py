@@ -18,7 +18,7 @@ class DatabaseStorage(DataStoreBase):
     def __init__(self, settings: DatabaseSettings):
         super().__init__(**settings.model_dump(exclude={'driver'}))
 
-        self._engine = create_async_engine(settings.url, echo=True)
+        self._engine = create_async_engine(settings.db_url, echo=True)
         self._SessionLocal = sessionmaker(
             autocommit=False,
             autoflush=False,
