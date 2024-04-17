@@ -17,7 +17,13 @@ jobs:
       - name: Set storage mode to SQLite
         run: echo -e "[storage]\nmode=0" > config/storage.cfg
       - name: Build and Start the Docker containers
-        run: docker-compose up --build -d
+        run: |
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_HOST=localhost" >> .env
+          echo "DB_PORT=0" >> .env
+          docker-compose up --build -d
       - name: Check if container is healthy
         run: |
           sleep 80
