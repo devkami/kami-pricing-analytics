@@ -26,23 +26,20 @@ jobs:
           docker-compose up --build -d
       - name: Check if container is healthy
         run: |
-          sleep 80
-          max_attempts=40
-          attempt=1
-          while [ $attempt -le $max_attempts ]; do
+          sleep 90          
+          health_status=$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose ps -q pricing-analytics))
+          max_attempts=50
+          while [ $health_status != "healthy" ]; do
             health_status=$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose ps -q pricing-analytics))
             echo "Attempt $attempt: Container Health Status - $health_status"
-            if [ "$health_status" == "healthy" ]; then
-              echo "Healthy Container!"
-              break
+            if [ "$max_attempts" -eq "$attempt" ]; then
+              echo "Container not healthy after $max_attempts attempts."
+              exit 1
             fi
             attempt=$((attempt + 1))
             sleep 1
           done
-                 if [ $attempt -gt $max_attempts ]; then
-            echo "Container not healthy after $max_attempts attempts."
-            exit 1
-          fi
+                
       - name: Test /api/docs endpoint
         run: |
           curl -s http://0.0.0.0:8001/api/docs > /dev/null || exit 1
