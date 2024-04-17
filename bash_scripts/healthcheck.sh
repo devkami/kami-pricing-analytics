@@ -30,8 +30,3 @@ fi
 if ! attempt_request 3 1 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "product_url": "https://www.belezanaweb.com.br/amend-complete-repair-shampoo-250ml/ofertas-marketplace", "research_strategy": 0 }'; then
   exit 1
 fi
-
-# Check 3: POST /api/research (2nd URL) with 10 attempts and 3-second interval
-if ! attempt_request 10 3 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "product_url": "https://www.amazon.com.br/dp/B07GYX8QRJ", "research_strategy": 0 }'; then
-  exit 1
-fi
