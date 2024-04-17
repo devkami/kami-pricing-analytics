@@ -25,7 +25,7 @@ jobs:
           echo "DB_PORT=0" >> .env
           docker-compose up --build -d
       
-            - name: Check if container is healthy
+      - name: Check if container is healthy
         run: |
           sleep 90
           attempt=1
