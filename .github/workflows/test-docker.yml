@@ -25,15 +25,22 @@ jobs:
           echo "DB_PORT=0" >> .env
           docker-compose up --build -d
       
-      - name: Check if container is healthy
+        - name: Check if container is healthy
         run: |
           sleep 90
           attempt=1
-          health_status=$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose ps -q pricing-analytics))
+          container_id=$(docker-compose ps -q pricing-analytics)
+          health_status=$(docker inspect --format='{{.State.Health.Status}}' $container_id)
           while [ "$health_status" != "healthy" ]; do
             echo "Attempt $attempt: Container Health Status - $health_status"
-            sleep 1
-            health_status=$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose ps -q pricing-analytics))
+            echo "Logs from the container:"
+            docker logs $container_id
+            if [ $attempt -ge 20 ]; then
+              echo "Container not healthy after 20 attempts."
+              exit 1
+            fi
+            sleep 2
+            health_status=$(docker inspect --format='{{.State.Health.Status}}' $container_id)
             attempt=$((attempt + 1))
           done
           echo "Container is now healthy."
