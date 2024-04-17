@@ -24,20 +24,22 @@ jobs:
           echo "DB_HOST=localhost" >> .env
           echo "DB_PORT=0" >> .env
           docker-compose up --build -d
+      
       - name: Check if container is healthy
         run: |
-          sleep 90          
+          sleep 90
+          attempt=1          
           health_status=$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose ps -q pricing-analytics))
-          max_attempts=50
+          max_attempts=20
           while [ $health_status != "healthy" ]; do
-            health_status=$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose ps -q pricing-analytics))
             echo "Attempt $attempt: Container Health Status - $health_status"
             if [ "$max_attempts" -eq "$attempt" ]; then
               echo "Container not healthy after $max_attempts attempts."
               exit 1
             fi
+            health_status=$(docker inspect --format='{{.State.Health.Status}}' $(docker-compose ps -q pricing-analytics))
             attempt=$((attempt + 1))
-            sleep 1
+            sleep 2
           done
                 
       - name: Test /api/docs endpoint
