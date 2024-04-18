@@ -26,7 +26,13 @@ if ! attempt_request 3 1 http://0.0.0.0:8001/api/docs; then
   exit 1
 fi
 
-# Check 2: POST /api/research (1st URL) with 3 attempts and 1-second interval
+# Check 2: POST /api/research with product_url for beleza_na_web |  with 3 attempts and 1-second interval
 if ! attempt_request 3 1 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "product_url": "https://www.belezanaweb.com.br/amend-complete-repair-shampoo-250ml/ofertas-marketplace", "research_strategy": 0 }'; then
   exit 1
 fi
+
+# Check 3: POST /api/research with marketplace and marketplace_id for amazon |  with 3 attempts and 10-second interval
+if ! attempt_request 3 10 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "marketplace": "amazon", "marketplace_id": "B07GYX8QRJ" }'; then
+  exit 1
+fi
+
