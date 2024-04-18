@@ -76,7 +76,7 @@ class TestPricingResearch(unittest.IsolatedAsyncioTestCase):
 
     def test_extract_marketplace_from_url(self):
         instance = PricingResearch(url=self.valid_data['url'])
-        self.assertEqual(instance.marketplace, 'AMAZON')
+        self.assertEqual(instance.marketplace, 'amazon')
 
     def test_extract_marketplace_id_from_url(self):
         instance = PricingResearch(url=self.valid_data['url'])
@@ -84,7 +84,7 @@ class TestPricingResearch(unittest.IsolatedAsyncioTestCase):
 
     def test_get_marketplace_info_from_url(self):
         instance = PricingResearch(url=self.valid_data['url'])
-        self.assertEqual(instance.marketplace, 'AMAZON')
+        self.assertEqual(instance.marketplace, 'amazon')
         self.assertEqual(instance.marketplace_id, 'MLB-3340422055')
 
     def test_success_define_web_scraping_strategy(self):
