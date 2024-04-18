@@ -76,7 +76,7 @@ class PricingResearch(BaseModel):
             for option in MarketPlaceOptions:
                 marketplace_name = option.name.lower().replace('_', '')
                 if marketplace_name in parsed_url.geturl():
-                    self.marketplace = option.name
+                    self.marketplace = option.name.lower()
                     break
         return self
 
@@ -129,7 +129,7 @@ class PricingResearch(BaseModel):
         if result:
             self.sellers = result
             first_result = result[0] if result else {}
-            self.sku = first_result.get('sku')
+            self.marketplace_id = first_result.get('marketplace_id')
             self.description = first_result.get('description')
             self.brand = first_result.get('brand')
             self.category = first_result.get('category')

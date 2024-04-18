@@ -18,7 +18,7 @@ class BelezaNaWebScraper(BaseScraper):
             sellers_data = id_seller.get('data-sku')
             row = json.loads(sellers_data)[0]
             seller_info = {
-                'sku': row['sku'],
+                'marketplace_id': row['sku'],
                 'brand': row['brand'],
                 'category': row['category'],
                 'description': row['name'],

@@ -107,7 +107,7 @@ class AmazonScraper(BaseScraper):
                     'seller', [None]
                 )[0]
                 seller_info = {
-                    'sku': asin,
+                    'marketplace_id': asin,
                     'brand': brand,
                     'description': description,
                     'price': price,

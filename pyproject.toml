@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kami_pricing_analytics"
-version = "0.4.5"
+version = "0.4.6"
 description = "A Scalable FastAPI-based Pricing Analytics API for Research Data Management and Analysis"
 authors = ["Maicon de Menezes <maicondmenezes@gmail.com>"]
 readme = "README.md"
