@@ -1,16 +1,16 @@
 import configparser
+import logging
 import os
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, BackgroundTasks, FastAPI, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
-from kami_pricing_analytics.schemas.options import StrategyOptions
-from kami_pricing_analytics.schemas.pricing_research import PricingResearch
 from kami_pricing_analytics.data_storage.storage_factory import (
     StorageModeOptions,
 )
-import logging
+from kami_pricing_analytics.schemas.options import StrategyOptions
+from kami_pricing_analytics.schemas.pricing_research import PricingResearch
 
 research_app = FastAPI(
     title='KAMI-Pricing Analytics API',
@@ -26,8 +26,19 @@ storage_mode = StorageModeOptions(settings.getint('storage', 'MODE'))
 
 
 class ResearchRequest(BaseModel):
-    product_url: str
+    product_url: str = None
+    marketplace: str = None
+    marketplace_id: str = None
     research_strategy: int = StrategyOptions.WEB_SCRAPING.value
+
+    @field_validator('product_url', 'marketplace', 'marketplace_id')
+    @classmethod
+    def chek_input_required_fields(cls, value):
+        if not any(value.values()):
+            raise ValueError(
+                'Either Product URL or marketplace and marketplace_id is required to conduct research.'
+            )
+        return value
 
 
 @research_app.post(
@@ -39,7 +50,13 @@ async def research(
     product_data: ResearchRequest, background_tasks: BackgroundTasks
 ):
     try:
-        pricing_research = PricingResearch(url=product_data.product_url)
+        if product_data.product_url:
+            pricing_research = PricingResearch(url=product_data.product_url)
+        else:
+            pricing_research = PricingResearch(
+                marketplace=product_data.marketplace,
+                marketplace_id=product_data.marketplace_id,
+            )
         pricing_research.set_strategy(product_data.research_strategy)
         pricing_research.set_storage(mode_option=storage_mode)
 

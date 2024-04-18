@@ -14,6 +14,7 @@ class PricingResearchModel(Base):
 
     marketplace = Column(String, nullable=True)
     sku = Column(String, index=True, nullable=True)
+    marketplace_id = Column(String, nullable=True)
     description = Column(String, nullable=True)
     brand = Column(String, nullable=True)
     category = Column(String, nullable=True)
