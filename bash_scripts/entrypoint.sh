@@ -73,11 +73,19 @@ rm -rf browser/
 echo "Installing main dependencies..."
 poetry install --only main --no-interaction --no-ansi
 
-echo "Applying database migrations if exists..."
+# Migrations folder
+MIGRATION_DIR="migrations/versions"
 
-echo "Creating migrations"
-poetry run task makemigrations -m "Initial migration"
+# Check if any migrations exists and are pending in migrations versions folder
+if [ -z "$(find $MIGRATION_DIR -maxdepth 1 -type f -name '*.py')" ]; then
+    echo "No pending database migrations found."
+    poetry run task makemigrations -m "Initial migration"
+else
+    echo "Pending database migrations found."
+fi
 
+# Apply all pending migrations
+echo "Applying latest database migrations..."
 poetry run task migrate || { echo "Database migration failed"; exit 1; }
 
 # Start the FastAPI application
