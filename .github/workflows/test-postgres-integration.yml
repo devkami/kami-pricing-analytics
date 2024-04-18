@@ -1,4 +1,4 @@
-name: Integration Test
+name: PostgreSQL Integration Test
 
 on:
   workflow_run:
@@ -6,7 +6,7 @@ on:
     branches: [master]
     types:
       - completed
-  
+
 jobs:
   integration-test:
     runs-on: ubuntu-latest
@@ -27,20 +27,21 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set storage mode to PostgreSQL
-      run: echo -e "[storage]\nmode=1" > config/settings.cfg
-    
-    - name: Build and Start the Docker containers
-      run: |
-        echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-        echo "DB_HOST=postgres" >> .env
-        echo "DB_PORT=5432" >> .env
-        docker-compose up --build -d
+      - uses: actions/checkout@v3
 
-     name: Check if container is healthy
+      - name: Set storage mode to PostgreSQL
+        run: echo -e "[storage]\nmode=1" > config/settings.cfg
+
+      - name: Build and Start the Docker containers
+        run: |
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_HOST=postgres" >> .env
+          echo "DB_PORT=5432" >> .env
+          docker-compose up --build -d
+
+      - name: Check if container is healthy
         run: |
           sleep 90
           attempt=1
@@ -59,9 +60,10 @@ jobs:
             attempt=$((attempt + 1))
           done
           echo "Container is now healthy."
-                
+
       - name: Test /api/docs endpoint
         run: |
           curl -s http://0.0.0.0:8001/api/docs > /dev/null || exit 1
+
       - name: Shut down the Docker containers
         run: docker-compose down
