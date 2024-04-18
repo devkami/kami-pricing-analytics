@@ -24,7 +24,7 @@ jobs:
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
           echo "DB_HOST=postgres" >> .env
           echo "DB_PORT=5432" >> .env
-          docker-compose up postgres pricing-analytics --build -d
+          docker-compose up --build -d postgres pricing-analytics
 
       - name: Check if container is healthy
         run: |
