@@ -1,4 +1,4 @@
-name: PostgreSQL Integration Test
+name: MySQL Integration Test
 
 on:
   workflow_run:
