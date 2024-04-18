@@ -12,7 +12,7 @@ class MySQLSettings(DatabaseSettings):
 
     @property
     def db_url(self):
-        return f'{self.db_driver}://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}'
+        return f'{self.db_driver}://{self.db_user}:{self.db_password.get_secret_value()}@{self.db_host}:{self.db_port}/{self.db_name}'
 
 
 class MySQLStorage(DatabaseStorage):

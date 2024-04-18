@@ -6,20 +6,19 @@ from sqlalchemy.types import TIMESTAMP
 
 Base = declarative_base()
 
-
 class PricingResearchModel(Base):
     __tablename__ = 'pricing_research'
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
 
-    marketplace = Column(String, nullable=True)
-    sku = Column(String, index=True, nullable=True)
-    marketplace_id = Column(String, nullable=True)
-    description = Column(String, nullable=True)
-    brand = Column(String, nullable=True)
-    category = Column(String, nullable=True)
-    url = Column(String)
-    strategy = Column(String, nullable=True)
+    marketplace = Column(String(255), nullable=True)  
+    sku = Column(String(255), index=True, nullable=True)
+    marketplace_id = Column(String(255), nullable=True)
+    description = Column(String(1024), nullable=True)  
+    brand = Column(String(255), nullable=True)
+    category = Column(String(255), nullable=True)
+    url = Column(String(512), nullable=True)  
+    strategy = Column(String(255), nullable=True)
     sellers = Column(JSON)
 
     conducted_at = Column(
