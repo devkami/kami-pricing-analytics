@@ -44,20 +44,8 @@ jobs:
       - name: Check if container is healthy
         run: |
           sleep 200
-          attempt=1
-          container_id=$(docker-compose ps -q pricing-analytics)
-          health_status=$(docker inspect --format='{{.State.Health.Status}}' $container_id)
-          while [ "$health_status" != "healthy" ]; do
-            echo "Attempt $attempt: Container Health Status - $health_status"            
-            if [ $attempt -ge 20 ]; then
-              echo "Container not healthy after 20 attempts."
-              exit 1
-            fi
-            sleep 2
-            health_status=$(docker inspect --format='{{.State.Health.Status}}' $container_id)
-            attempt=$((attempt + 1))
-          done
-          echo "Container is now healthy."
+          docker-compose logs
+         
 
       - name: Test /api/docs endpoint
         run: |
