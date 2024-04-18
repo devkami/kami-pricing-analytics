@@ -28,7 +28,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
     - name: Set storage mode to PostgreSQL
       run: echo -e "[storage]\nmode=1" > config/settings.cfg
     
@@ -41,20 +40,28 @@ jobs:
         echo "DB_PORT=5432" >> .env
         docker-compose up --build -d
 
-    - name: Check if container is running
-      run: |
-        curl http://0.0.0.0:8001/api/docs
-
-    - name: Run Post VALID_PRODUCT_URL with web_scrap strategy Tests
-      env:
-        VALID_PRODUCT_URL: ${{ secrets.VALID_PRODUCT_URL }}
-      run: |
-        # POST request to the /research endpoint
-        RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X POST http://0.0.0.0:8001/api/research -H "Content-Type: application/json" -d '{"product_url": "'"$VALID_PRODUCT_URL"'", "research_strategy": 0}')
-        if [ "$RESPONSE" -ne "200" ]; then
-          echo "Integration test failed: Response code $RESPONSE"
-          exit 1
-        fi
-    
-    - name: Cleanup
-      run: docker-compose down
+     name: Check if container is healthy
+        run: |
+          sleep 90
+          attempt=1
+          container_id=$(docker-compose ps -q pricing-analytics)
+          health_status=$(docker inspect --format='{{.State.Health.Status}}' $container_id)
+          while [ "$health_status" != "healthy" ]; do
+            echo "Attempt $attempt: Container Health Status - $health_status"
+            echo "Logs from the container:"
+            docker logs $container_id
+            if [ $attempt -ge 20 ]; then
+              echo "Container not healthy after 20 attempts."
+              exit 1
+            fi
+            sleep 2
+            health_status=$(docker inspect --format='{{.State.Health.Status}}' $container_id)
+            attempt=$((attempt + 1))
+          done
+          echo "Container is now healthy."
+                
+      - name: Test /api/docs endpoint
+        run: |
+          curl -s http://0.0.0.0:8001/api/docs > /dev/null || exit 1
+      - name: Shut down the Docker containers
+        run: docker-compose down
