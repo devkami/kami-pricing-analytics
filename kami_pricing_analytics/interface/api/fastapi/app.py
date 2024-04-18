@@ -4,7 +4,7 @@ import os
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, BackgroundTasks, FastAPI, HTTPException, status
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, model_validator
 
 from kami_pricing_analytics.data_storage.storage_factory import (
     StorageModeOptions,
@@ -31,14 +31,13 @@ class ResearchRequest(BaseModel):
     marketplace_id: str = None
     research_strategy: int = StrategyOptions.WEB_SCRAPING.value
 
-    @field_validator('product_url', 'marketplace', 'marketplace_id')
-    @classmethod
-    def chek_input_required_fields(cls, value):
-        if not any(value.values()):
+    @model_validator(mode='after')
+    def check_input_required_fields(self):
+        if not self.product_url and (not self.marketplace or not self.marketplace_id):
             raise ValueError(
                 'Either Product URL or marketplace and marketplace_id is required to conduct research.'
             )
-        return value
+        return self
 
 
 @research_app.post(
