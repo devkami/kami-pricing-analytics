@@ -1,0 +1,39 @@
+name: PostgreSQL Integration Test
+
+on:
+  workflow_run:
+    workflows: ["Docker Compose Test"]
+    branches: [master]
+    types:
+      - completed
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest    
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set storage mode to MySQL
+        run: echo -e "[storage]\nmode=2" > config/settings.cfg
+
+      - name: Build and Start the Docker containers
+        run: |
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_HOST=mysql" >> .env
+          echo "DB_PORT=3306" >> .env
+          docker-compose up --build -d mysql pricing-analytics
+
+      - name: Check if container is healthy
+        run: |
+          sleep 90
+          docker-compose logs --tail 100         
+
+      - name: Test /api/docs endpoint
+        run: |
+          curl -s http://0.0.0.0:8001/api/docs > /dev/null || exit 1
+
+      - name: Shut down the Docker containers
+        run: docker-compose down
