@@ -6,6 +6,22 @@ from urllib.parse import urlparse
 import httpx
 from pydantic import ConfigDict, Field
 from robotexclusionrulesparser import RobotExclusionRulesParser as Robots
+import asyncio
+import logging
+import random
+import time
+from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import parse_qs, urlparse
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium_stealth import stealth
+from webdriver_manager.chrome import ChromeDriverManager
 
 from kami_pricing_analytics.data_collector.strategies.base_strategy import (
     BaseStrategy,
@@ -13,6 +29,7 @@ from kami_pricing_analytics.data_collector.strategies.base_strategy import (
 from kami_pricing_analytics.data_collector.strategies.web_scraping.constants import (
     DEFAULT_CRAWL_DELAY,
     DEFAULT_USER_AGENT,
+    USER_AGENTS,
 )
 
 
@@ -24,6 +41,7 @@ class BaseScraper(BaseStrategy):
     crawl_delay: int = Field(default=DEFAULT_CRAWL_DELAY)
     logger_name: str = Field(default='pricing-scraper')
     logger: logging.Logger = Field(default=None)
+    webdriver: WebDriver = Field(default=None)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -32,7 +50,41 @@ class BaseScraper(BaseStrategy):
         self.base_url = self.product_url.scheme + '://' + self.product_url.host
         self.robots_url = f'{self.base_url}/robots.txt'
         self._crawl_delay_fetched = False
-        self.set_logger(self.logger_name)
+        self.set_logger(self.logger_name)        
+
+    def _setup_driver(self):
+        options = Options()
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+    
+        user_agent = random.choice(USER_AGENTS)
+        print(f'Using User-Agent: {user_agent}')
+        options.add_argument(f'user-agent={user_agent}')
+
+        driver = webdriver.Chrome(
+            service=Service(ChromeDriverManager().install()), options=options
+        )
+        stealth(
+            driver,
+            languages=['en-US', 'en'],
+            vendor='Google Inc.',
+            platform='Win32',
+            webgl_vendor='Intel Inc.',
+            renderer='Intel Iris OpenGL Engine',
+            fix_hairline=True,
+        )
+        return driver
+
+    async def set_webdriver(self) -> WebDriver:
+        try:
+            with ThreadPoolExecutor() as executor:
+                loop = asyncio.get_running_loop()
+                future = loop.run_in_executor(executor, self._setup_driver)
+                driver = await future
+                self.webdriver = driver
+        except Exception as e:
+            self.logger.exception(f'Error getting webdriver: {e}')
 
     @asynccontextmanager
     async def get_http_client(self):
@@ -65,10 +117,11 @@ class BaseScraper(BaseStrategy):
     def set_logger(self, logger_name: str):
         self.logger = logging.getLogger(logger_name)
 
-    async def fetch_content(self) -> str:
+    async def fetch_content(self, url: str = '') -> str:
         await self._ensure_crawl_delay()
         async with self.get_http_client() as client:
-            response = await client.get(str(self.product_url))
+            product_url = url if url else str(self.product_url)
+            response = await client.get(product_url)
         return response.text
 
     @abstractmethod
