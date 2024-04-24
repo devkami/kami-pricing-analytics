@@ -14,7 +14,6 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.common.by import By
 from selenium_stealth import stealth
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -37,6 +36,7 @@ class BaseScraper(BaseStrategy, ABC):
     logger_name: str = Field(default='pricing-scraper')
     logger: logging.Logger = Field(default=None)
     webdriver: WebDriver = Field(default=None)
+    user_agents: list = USER_AGENTS
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -53,7 +53,7 @@ class BaseScraper(BaseStrategy, ABC):
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
 
-        user_agent = random.choice(USER_AGENTS)
+        user_agent = random.choice(self.user_agents)
         print(f'Using User-Agent: {user_agent}')
         options.add_argument(f'user-agent={user_agent}')
 
