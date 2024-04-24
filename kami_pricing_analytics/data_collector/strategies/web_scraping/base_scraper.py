@@ -1,25 +1,20 @@
+import asyncio
 import logging
+import random
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
 import httpx
 from pydantic import ConfigDict, Field
 from robotexclusionrulesparser import RobotExclusionRulesParser as Robots
-import asyncio
-import logging
-import random
-import time
-from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import parse_qs, urlparse
-
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium_stealth import stealth
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -33,7 +28,7 @@ from kami_pricing_analytics.data_collector.strategies.web_scraping.constants imp
 )
 
 
-class BaseScraper(BaseStrategy):
+class BaseScraper(BaseStrategy, ABC):
     user_agent: str = Field(default=DEFAULT_USER_AGENT)
     http_client: httpx.AsyncClient = Field(default=None)
     base_url: str = Field(default='')
@@ -50,14 +45,14 @@ class BaseScraper(BaseStrategy):
         self.base_url = self.product_url.scheme + '://' + self.product_url.host
         self.robots_url = f'{self.base_url}/robots.txt'
         self._crawl_delay_fetched = False
-        self.set_logger(self.logger_name)        
+        self.set_logger(self.logger_name)
 
     def _setup_driver(self):
         options = Options()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
-    
+
         user_agent = random.choice(USER_AGENTS)
         print(f'Using User-Agent: {user_agent}')
         options.add_argument(f'user-agent={user_agent}')
@@ -125,8 +120,63 @@ class BaseScraper(BaseStrategy):
         return response.text
 
     @abstractmethod
-    async def scrap_product(self) -> list:
+    async def get_marketplace_id(self) -> str:
         pass
+
+    @abstractmethod
+    async def get_brand(self) -> str:
+        pass
+
+    @abstractmethod
+    async def get_description(self) -> str:
+        pass
+
+    @abstractmethod
+    async def get_price(self) -> str:
+        pass
+
+    @abstractmethod
+    async def get_seller_id(self) -> str:
+        pass
+
+    @abstractmethod
+    async def get_seller_name(self) -> str:
+        pass
+
+    @abstractmethod
+    async def get_seller_info(self, seller) -> dict:
+        pass
+
+    @abstractmethod
+    async def get_sellers_list(self) -> list:
+        pass
+
+    async def scrap_product(self) -> list:
+        try:
+            await self.set_webdriver()
+            sellers = await self.get_sellers_list()
+            sellers_list = []
+            for seller in sellers:
+                try:
+                    seller_info = await self.get_seller_info(seller)
+                    sellers_list.append(seller_info)
+                except Exception as e:
+                    self.logger.error(f'Error while getting seller info: {e}')
+            return sellers_list
+        except WebDriverException as wd_error:
+            self.logger.error(
+                f'Webdriver Error while scraping product: {wd_error}'
+            )
+        except Exception as e:
+            self.logger.error(f'Unexpected Error while scraping product: {e}')
+        finally:
+            if self.webdriver:
+                self.webdriver.quit()
+
+        return []
+
+    async def execute(self) -> dict:
+        return {'result': await self.scrap_product()}
 
     async def close_http_client(self):
         await self.http_client.aclose()
