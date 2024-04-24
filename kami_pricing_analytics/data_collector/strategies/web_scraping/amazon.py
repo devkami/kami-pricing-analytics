@@ -17,62 +17,6 @@ class AmazonScraper(BaseScraper):
     def __init__(self, **data):
         super().__init__(**data, logger_name='amazon-scraper')
 
-    """ async def scrap_product(self):
-        await self.set_webdriver()
-        self.webdriver.get(str(self.product_url))
-        sellers_list = []
-        try:
-            asin = self.webdriver.find_element(
-                By.XPATH,
-                '//th[contains(text(), "ASIN")]/following-sibling::td',
-            ).text.strip()
-            description = self.webdriver.find_element(By.ID, 'title').text.strip()
-            brand = self.webdriver.find_element(
-                By.XPATH,
-                '//th[contains(text(), "Fabricante")]/following-sibling::td',
-            ).text.strip()
-            clickable_element = self.webdriver.find_element(
-                By.CSS_SELECTOR, 'a.a-touch-link.a-box.olp-touch-link'
-            )
-            clickable_element.click()
-            WebDriverWait(self.webdriver, 10).until(
-                EC.visibility_of_element_located((By.ID, 'aod-offer-list'))
-            )
-            offers = self.webdriver.find_elements(
-                By.CSS_SELECTOR, '#aod-offer-list #aod-offer'
-            )
-
-            for offer in offers:
-                price = offer.find_element(
-                    By.CSS_SELECTOR, 'span.a-offscreen'
-                ).get_attribute('innerHTML')
-                seller_name = offer.find_element(
-                    By.CSS_SELECTOR, 'a.a-size-small.a-link-normal'
-                ).get_attribute('innerHTML')
-                seller_link = offer.find_element(
-                    By.CSS_SELECTOR, 'a.a-size-small.a-link-normal'
-                ).get_attribute('href')
-                seller_id = parse_qs(urlparse(seller_link).query).get(
-                    'seller', [None]
-                )[0]
-                seller_info = {
-                    'marketplace_id': asin,
-                    'brand': brand,
-                    'description': description,
-                    'price': price,
-                    'seller_id': seller_id,
-                    'seller_name': seller_name,
-                }
-                sellers_list.append(seller_info)
-
-        except Exception as e:
-            raise AmazonScraperException(f'Error when scraping product: {e}')
-
-        finally:
-            self.webdriver.quit()
-            return sellers_list
-    """
-
     async def get_marketplace_id(self):
         marketplace_id = ''
         try:
@@ -152,6 +96,20 @@ class AmazonScraper(BaseScraper):
 
         return seller_name
 
+    async def get_seller_url(self, seller):
+        seller_url = ''
+        try:
+            seller_url = seller.find_element(
+                By.CSS_SELECTOR, 'a.a-size-small.a-link-normal'
+            ).get_attribute('href')
+        except Exception as e:
+            raise AmazonScraperException(
+                f'Error while getting seller url: {e}'
+            )
+
+        return seller_url
+        
+    
     async def get_sellers_list(self):
         sellers = []
         try:
@@ -169,15 +127,21 @@ class AmazonScraper(BaseScraper):
             )
             for seller_offer in sellers_offers:
                 seller = {
+                    'product_url': self.product_url,
+                    'marketplace_id': '',
+                    'brand': '',
+                    'description': '',
                     'price': '',
                     'seller_id': '',
                     'seller_name': '',
+                    'seller_url': '',
                 }
                 seller['price'] = await self.get_price(seller_offer)
                 seller['seller_id'] = await self.get_seller_id(seller_offer)
                 seller['seller_name'] = await self.get_seller_name(
                     seller_offer
                 )
+                seller['seller_url'] = await self.get_seller_url(seller_offer)
                 sellers.append(seller)
         except Exception as e:
             raise AmazonScraperException(
@@ -201,6 +165,3 @@ class AmazonScraper(BaseScraper):
             )
 
         return seller
-
-    async def execute(self) -> dict:
-        return {'result': await self.scrap_product()}
