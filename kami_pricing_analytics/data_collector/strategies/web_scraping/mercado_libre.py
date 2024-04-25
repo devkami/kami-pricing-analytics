@@ -48,11 +48,11 @@ class MercadoLibreScraper(BaseScraper):
 
         return f'{self.search_url}/{product_description}'
 
-    async def get_marketplace_id(self, seller_link: str):
+    async def get_marketplace_id(self, seller_url: str):
         marketplace_id = ''
 
         try:
-            parsed_url = urlparse(seller_link)
+            parsed_url = urlparse(seller_url)
             query_params = parse_qs(parsed_url.query)
             marketplace_id = query_params.get('item_id', [None])[0]
         except Exception as e:
@@ -129,11 +129,11 @@ class MercadoLibreScraper(BaseScraper):
 
         return price
 
-    async def get_seller_id(self, seller_link: str):
+    async def get_seller_id(self, seller_url: str):
         seller_id = ''
 
         try:
-            parsed_url = urlparse(seller_link)
+            parsed_url = urlparse(seller_url)
             query_params = parse_qs(parsed_url.query)
             seller_id = query_params.get('seller_id', [None])[0]
         except Exception as e:
@@ -174,12 +174,28 @@ class MercadoLibreScraper(BaseScraper):
             'Element not found with any of the provided XPaths.'
         )
 
-    async def get_seller_info(self, seller_url: str):
-        self.webdriver.get(seller_url)
+    async def get_seller_url(self):
+        seller_url = ''
         seller_link_xpaths = (
-            "//div[contains(@class, 'ui-seller-info')]/following::a[1]",
-            "//div[contains(@class, 'ui-seller-data-footer__container')]/following::a[1]",
+            "//div[@id='seller_info']/descendant::a[1]",
+            "//div[@id='seller_data']/descendant::a[1]",
         )
+
+        try:
+            seller_link_element = self._find_element_by_multiple_xpaths(
+                seller_link_xpaths
+            )
+            seller_url = seller_link_element.get_attribute('href')
+        except Exception as e:
+            raise MercadoLibreScraperException(
+                f'Error while getting seller URL: {e}'
+            )
+
+        return seller_url
+
+    async def get_seller_info(self, seller_product_page: str):
+        self.webdriver.get(seller_product_page)
+        seller_url = ''
 
         seller = {
             'product_url': '',
@@ -193,21 +209,17 @@ class MercadoLibreScraper(BaseScraper):
         }
 
         try:
-
-            seller_link_element = self._find_element_by_multiple_xpaths(
-                seller_link_xpaths
-            )
-            seller_link = seller_link_element.get_attribute('href')
-            seller['product_url'] = seller_url
+            seller_url = await self.get_seller_url()
+            seller['product_url'] = seller_product_page
             seller['marketplace_id'] = await self.get_marketplace_id(
-                seller_link
+                seller_url
             )
             seller['brand'] = await self.get_brand()
             seller['description'] = await self.get_description()
             seller['price'] = await self.get_price()
-            seller['seller_id'] = await self.get_seller_id(seller_link)
+            seller['seller_id'] = await self.get_seller_id(seller_url)
             seller['seller_name'] = await self.get_seller_name()
-            seller['seller_url'] = seller_link
+            seller['seller_url'] = seller_url
         except MercadoLibreScraperException as e:
             self.logger.error(
                 f'Error while getting seller info details from {seller_url}: {e}'
