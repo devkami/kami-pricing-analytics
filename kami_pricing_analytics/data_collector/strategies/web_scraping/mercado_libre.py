@@ -147,12 +147,11 @@ class MercadoLibreScraper(BaseScraper):
         seller_name = ''
 
         try:
-            seller_title = self.webdriver.find_element(
-                By.CSS_SELECTOR, 'div.ui-pdp-seller__header__title'
-            )
-            seller_name = seller_title.find_element(
-                By.CSS_SELECTOR,
-                'span.ui-pdp-color--BLUE.ui-pdp-family--REGULAR',
+            seller_name_xpath_expression = (
+                "//div[@class='ui-pdp-seller__header']/descendant::span[2]"
+            )  
+            seller_name = self.webdriver.find_element(
+                By.XPATH, seller_name_xpath_expression
             ).text
         except Exception as e:
             raise MercadoLibreScraperException(
@@ -222,11 +221,11 @@ class MercadoLibreScraper(BaseScraper):
             seller['seller_url'] = seller_url
         except MercadoLibreScraperException as e:
             self.logger.error(
-                f'Error while getting seller info details from {seller_url}: {e}'
+                f'Error while getting seller info details from {seller_product_page}: {e}'
             )
         except Exception as e:
             self.logger.error(
-                f'Unexpected Error while getting seller info from {seller_url}: {e}'
+                f'Unexpected Error while getting seller info from {seller_product_page}: {e}'
             )
 
         return seller
