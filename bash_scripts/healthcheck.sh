@@ -36,3 +36,7 @@ if ! attempt_request 3 10 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accep
   exit 1
 fi
 
+# Check 4: POST /api/research with marketplace and marketplace_id for mercado livre |  with 3 attempts and 10-second interval
+if ! attempt_request 3 10 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "product_url": "https://produto.mercadolivre.com.br/MLB-1448733946" }'; then
+  exit 1
+fi
