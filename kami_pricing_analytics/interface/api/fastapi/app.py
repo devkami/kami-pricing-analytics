@@ -33,7 +33,9 @@ class ResearchRequest(BaseModel):
 
     @model_validator(mode='after')
     def check_input_required_fields(self):
-        if not self.product_url and (not self.marketplace or not self.marketplace_id):
+        if not self.product_url and (
+            not self.marketplace or not self.marketplace_id
+        ):
             raise ValueError(
                 'Either Product URL or marketplace and marketplace_id is required to conduct research.'
             )
