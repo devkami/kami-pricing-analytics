@@ -94,7 +94,7 @@ class AmazonScraper(BaseScraper):
                 f'Error while getting seller name: {e}'
             )
 
-        return seller_name
+        return seller_name[1:]
 
     async def get_seller_url(self, seller):
         seller_url = ''
@@ -108,8 +108,7 @@ class AmazonScraper(BaseScraper):
             )
 
         return seller_url
-        
-    
+
     async def get_sellers_list(self):
         sellers = []
         try:
