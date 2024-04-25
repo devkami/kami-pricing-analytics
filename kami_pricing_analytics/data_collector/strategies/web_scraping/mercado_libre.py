@@ -149,7 +149,7 @@ class MercadoLibreScraper(BaseScraper):
         try:
             seller_name_xpath_expression = (
                 "//div[@class='ui-pdp-seller__header']/descendant::span[2]"
-            )  
+            )
             seller_name = self.webdriver.find_element(
                 By.XPATH, seller_name_xpath_expression
             ).text
