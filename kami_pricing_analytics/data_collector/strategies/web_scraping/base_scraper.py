@@ -144,6 +144,10 @@ class BaseScraper(BaseStrategy, ABC):
         pass
 
     @abstractmethod
+    async def get_seller_url(self) -> str:
+        pass
+
+    @abstractmethod
     async def get_seller_info(self, seller) -> dict:
         pass
 
