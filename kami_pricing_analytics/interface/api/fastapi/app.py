@@ -15,7 +15,7 @@ from kami_pricing_analytics.schemas.pricing_research import PricingResearch
 research_app = FastAPI(
     title='KAMI-Pricing Analytics API',
     description="API to conduct pricing research over a product's URL.",
-    version='0.2.1',
+    version='0.5.0',
 )
 api_router = APIRouter()
 
@@ -30,6 +30,7 @@ class ResearchRequest(BaseModel):
     marketplace: str = None
     marketplace_id: str = None
     research_strategy: int = StrategyOptions.WEB_SCRAPING.value
+    store_research: bool = False
 
     @model_validator(mode='after')
     def check_input_required_fields(self):

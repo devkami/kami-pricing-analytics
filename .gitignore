@@ -172,3 +172,5 @@ pyrightconfig.json
 poetry.lock
 
 codealike.json
+
+.vscode
