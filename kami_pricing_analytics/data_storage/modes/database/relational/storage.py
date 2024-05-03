@@ -5,16 +5,16 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import DeclarativeMeta, sessionmaker
 
+from kami_pricing_analytics.data_storage.base_storage import BaseStorage
 from kami_pricing_analytics.data_storage.modes.database.relational.models import (
     PricingResearchModel,
 )
 from kami_pricing_analytics.data_storage.modes.database.relational.settings import (
     DatabaseSettings,
 )
-from kami_pricing_analytics.data_storage.storage_base import DataStoreBase
 
 
-class DatabaseStorage(DataStoreBase):
+class DatabaseStorage(BaseStorage):
     def __init__(self, settings: DatabaseSettings):
         super().__init__(**settings.model_dump(exclude={'driver'}))
 

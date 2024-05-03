@@ -26,3 +26,9 @@
 ### [] utilizar Celery com Redis para lidar com as requisições em estratégia de fila
 
 ### [] adicionar tratamento de paginação (principalmente no mercado livre)
+
+### [] adicionar método get à API
+
+### [] implementar funções de recuperação da informação através do storage
+
+### [] implementar um algoritmo inteligente para o get retornar dados do banco de dados de acordo com a última pesquisa, ou realizar uma pesquisa caso a validade da última pesquisa tenha expirado, ou não for encontrado nenhum registro para aquele produto no banco
