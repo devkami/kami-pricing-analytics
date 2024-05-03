@@ -10,17 +10,21 @@ from kami_pricing_analytics.data_collector.strategies.web_scraping.beleza_na_web
 from kami_pricing_analytics.data_collector.strategies.web_scraping.mercado_libre import (
     MercadoLibreScraper,
 )
+from kami_pricing_analytics.schemas.options import StrategyOptions
 
 
 class StrategyFactory:
     @staticmethod
-    def get_strategy(strategy: str, product_url: str) -> BaseScraper:
-        if strategy == 'web_scraping':
+    def get_strategy(strategy_option: int, product_url: str) -> BaseScraper:
+        if strategy_option == StrategyOptions.WEB_SCRAPING.value:
             if 'belezanaweb' in product_url:
                 return BelezaNaWebScraper(product_url=product_url)
             if 'amazon' in product_url:
                 return AmazonScraper(product_url=product_url)
             if 'mercadolivre' in product_url:
                 return MercadoLibreScraper(product_url=product_url)
+            raise ValueError('Unsupported marketplace for web scraping')
 
-        raise ValueError('Unsupported strategy')
+        raise ValueError(
+            'Unsupported strategy option. Available options are: 0 (WEB_SCRAPING)'
+        )

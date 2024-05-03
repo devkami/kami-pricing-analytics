@@ -4,7 +4,7 @@ from typing import Any, Dict
 from pydantic import BaseModel
 
 
-class DataStoreBase(BaseModel, ABC):
+class BaseStorage(BaseModel, ABC):
     """
     Abstract base class defining the contract for storage operations.
     All concrete storage mode implementations should inherit from this class
