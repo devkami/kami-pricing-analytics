@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from urllib.parse import urlparse
 
 import httpx

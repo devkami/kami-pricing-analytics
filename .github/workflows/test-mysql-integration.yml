@@ -28,7 +28,7 @@ jobs:
 
       - name: Check if container is healthy
         run: |
-          sleep 90
+          sleep 120
           docker-compose logs --tail 100         
 
       - name: Test /api/docs endpoint

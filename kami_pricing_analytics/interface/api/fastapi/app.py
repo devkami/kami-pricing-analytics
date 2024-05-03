@@ -1,5 +1,3 @@
-import configparser
-import os
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, FastAPI, HTTPException, status
@@ -8,7 +6,6 @@ from fastapi.responses import JSONResponse
 from kami_pricing_analytics.interface.api.pricing_research_request import (
     PricingResearchRequest,
 )
-from kami_pricing_analytics.schemas.pricing_research import PricingResearch
 
 research_app = FastAPI(
     title='KAMI-Pricing Analytics API',
