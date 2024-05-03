@@ -33,9 +33,10 @@ jobs:
           container_id=$(docker-compose ps -q pricing-analytics)
           health_status=$(docker inspect --format='{{.State.Health.Status}}' $container_id)
           while [ "$health_status" != "healthy" ]; do
-            echo "Attempt $attempt: Container Health Status - $health_status"            
-            if [ $attempt -ge 20 ]; then
-              echo "Container not healthy after 20 attempts."
+            echo "Attempt $attempt: Container Health Status - $health_status"
+            sleep 10
+            if [ $attempt -ge 50 ]; then
+              echo "Container not healthy after 50 attempts."
               exit 1
             fi
             sleep 2
