@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Dict, Type
+from typing import Dict, Type
 
 from kami_pricing_analytics.data_storage.base_storage import BaseStorage
 from kami_pricing_analytics.data_storage.modes.database.relational.mssql import (

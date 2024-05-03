@@ -28,7 +28,7 @@ jobs:
       
       - name: Check if container is healthy
         run: |
-          sleep 90
+          sleep 120
           attempt=1
           container_id=$(docker-compose ps -q pricing-analytics)
           health_status=$(docker inspect --format='{{.State.Health.Status}}' $container_id)
