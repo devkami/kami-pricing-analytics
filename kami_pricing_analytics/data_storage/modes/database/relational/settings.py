@@ -1,4 +1,4 @@
-from pydantic import Field, SecretStr
+from pydantic import ConfigDict, Field, SecretStr
 from pydantic_settings import BaseSettings
 
 
@@ -9,6 +9,13 @@ class DatabaseSettings(BaseSettings):
     db_host: str = Field(default='localhost')
     db_port: int
     db_driver: str
+
+    model_config = ConfigDict(
+        title='Database Settings',
+        str_strip_whitespace=True,
+        env_file='.env',
+        env_file_encoding='utf-8',
+    )
 
     @property
     def db_url(self) -> str:
