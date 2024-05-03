@@ -26,17 +26,17 @@ if ! attempt_request 3 1 http://0.0.0.0:8001/api/docs; then
   exit 1
 fi
 
-# Check 2: POST /api/research with product_url for beleza_na_web |  with 3 attempts and 1-second interval
-if ! attempt_request 3 1 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "product_url": "https://www.belezanaweb.com.br/amend-complete-repair-shampoo-250ml/ofertas-marketplace", "research_strategy": 0 }'; then
+# Check 2: POST /api/research with url for beleza_na_web |  with 3 attempts and 1-second interval
+if ! attempt_request 3 6 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "url": "https://www.belezanaweb.com.br/amend-complete-repair-shampoo-250ml/ofertas-marketplace", "strategy_option": 0 , "store_result": false}'; then
   exit 1
 fi
 
 # Check 3: POST /api/research with marketplace and marketplace_id for amazon |  with 3 attempts and 10-second interval
-if ! attempt_request 3 10 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "marketplace": "amazon", "marketplace_id": "B07GYX8QRJ" }'; then
+if ! attempt_request 3 24 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "marketplace": "amazon", "marketplace_id": "B07GYX8QRJ", "strategy_option": 0 , "store_result": false}'; then
   exit 1
 fi
 
 # Check 4: POST /api/research with marketplace and marketplace_id for mercado livre |  with 3 attempts and 10-second interval
-if ! attempt_request 3 10 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "product_url": "https://produto.mercadolivre.com.br/MLB-1448733946" }'; then
+if ! attempt_request 3 12 -X 'POST' 'http://0.0.0.0:8001/api/research' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "url": "https://produto.mercadolivre.com.br/MLB-1448733946", "strategy_option": 0 , "store_result": false}'; then
   exit 1
 fi

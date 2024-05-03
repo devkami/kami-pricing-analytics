@@ -179,8 +179,8 @@ class BaseScraper(BaseStrategy, ABC):
 
         return []
 
-    async def execute(self) -> dict:
-        return {'result': await self.scrap_product()}
+    async def execute(self) -> list:
+        return await self.scrap_product()
 
     async def close_http_client(self):
         await self.http_client.aclose()

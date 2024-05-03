@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Any, Dict, Type
 
+from kami_pricing_analytics.data_storage.base_storage import BaseStorage
 from kami_pricing_analytics.data_storage.modes.database.relational.mssql import (
     SQLServerSettings,
     SQLServerStorage,
@@ -24,7 +25,6 @@ from kami_pricing_analytics.data_storage.modes.database.relational.sqlite import
     SQLiteSettings,
     SQLiteStorage,
 )
-from kami_pricing_analytics.data_storage.storage_base import DataStoreBase
 
 
 class StorageModeOptions(Enum):
@@ -35,32 +35,38 @@ class StorageModeOptions(Enum):
     PLSQL = 4
 
 
+storage_options = [
+    f'{option.value} - {option.name}' for option in StorageModeOptions
+]
+
+
 class StorageFactory:
-    storage_mapping: Dict[StorageModeOptions, Type[DataStoreBase]] = {}
+    storage_mapping: Dict[StorageModeOptions, Type[BaseStorage]] = {}
     settings_mapping: Dict[StorageModeOptions, Type[DatabaseSettings]] = {}
 
     @classmethod
     def register_mode(
         cls,
         mode: StorageModeOptions,
-        storage: Type[DataStoreBase],
+        storage: Type[BaseStorage],
         settings: Type[DatabaseSettings],
     ):
         cls.storage_mapping[mode] = storage
         cls.settings_mapping[mode] = settings
 
     @classmethod
-    def get_mode(cls, mode: StorageModeOptions) -> Type[DataStoreBase]:
+    def get_mode(cls, mode: int) -> Type[BaseStorage]:
+        storage_mode_option = StorageModeOptions(mode)
         if (
-            mode not in cls.storage_mapping
-            and mode not in cls.settings_mapping
+            storage_mode_option not in cls.storage_mapping
+            and storage_mode_option not in cls.settings_mapping
         ):
             raise ValueError(
-                f'Unsupported STORAGE_MODE: {mode}. Available options: {StorageModeOptions.__members__}'
+                f'Unsupported STORAGE_MODE: {mode}. Available options: {storage_options}'
             )
-        settings_class = cls.settings_mapping.get(mode)
+        settings_class = cls.settings_mapping.get(storage_mode_option)
         settings = settings_class()
-        storage_class = cls.storage_mapping.get(mode)
+        storage_class = cls.storage_mapping.get(storage_mode_option)
         storage_mode = storage_class(settings=settings)
         return storage_mode
 
@@ -69,17 +75,15 @@ class DatabaseSettingsFactory:
     settings_mapping: Dict[StorageModeOptions, Type[DatabaseSettings]] = {}
 
     @classmethod
-    def register_settings(
-        cls, mode: StorageModeOptions, settings: Type[DatabaseSettings]
-    ):
-        cls.settings_mapping[mode] = settings
+    def register_settings(cls, mode: int, settings: Type[DatabaseSettings]):
+        cls.settings_mapping[StorageModeOptions(mode)] = settings
 
     @classmethod
-    def get_settings(cls, mode: StorageModeOptions) -> Type[DatabaseSettings]:
-        settings = cls.settings_mapping.get(mode)
+    def get_settings(cls, mode: int) -> Type[DatabaseSettings]:
+        settings = cls.settings_mapping.get(StorageModeOptions(mode))
         if settings is None:
             raise ValueError(
-                f'Unsupported Database Settings: {mode}. Available options: {StorageModeOptions.__members__}'
+                f'Unsupported Database Settings: {mode}. Available options: {storage_options}'
             )
         return settings
 
