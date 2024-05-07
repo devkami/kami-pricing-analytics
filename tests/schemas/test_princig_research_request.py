@@ -2,11 +2,11 @@ import asyncio
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from kami_pricing_analytics.interface.api.pricing_research_request import (
-    PricingResearchRequest,
-)
 from kami_pricing_analytics.schemas.options import StrategyOptions
 from kami_pricing_analytics.schemas.pricing_research import PricingResearch
+from kami_pricing_analytics.schemas.pricing_research_request import (
+    PricingResearchRequest,
+)
 from kami_pricing_analytics.services.pricing_service import PricingService
 
 

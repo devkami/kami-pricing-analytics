@@ -3,10 +3,11 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+
+from kami_pricing_analytics.schemas.options import StrategyOptions
 from kami_pricing_analytics.schemas.pricing_research_request import (
     PricingResearchRequest,
 )
-from kami_pricing_analytics.schemas.options import StrategyOptions
 
 research_app = FastAPI(
     title='KAMI-Pricing Analytics API',
@@ -22,6 +23,7 @@ class PricingResearchPayload(BaseModel):
     marketplace_id: Optional[str] = Field(default=None)
     strategy_option: int = Field(default=StrategyOptions.WEB_SCRAPING.value)
     store_result: bool = Field(default=False)
+
 
 @research_app.post(
     '/research',
