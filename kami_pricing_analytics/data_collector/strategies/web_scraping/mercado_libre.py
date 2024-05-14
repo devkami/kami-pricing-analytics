@@ -1,18 +1,20 @@
+from typing import Dict, List
 from urllib.parse import parse_qs, urlparse
 
 from pydantic import Field
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 
-from kami_pricing_analytics.data_collector.strategies.web_scraping.base_scraper import (
-    BaseScraper,
-)
-from kami_pricing_analytics.data_collector.strategies.web_scraping.constants import (
-    USER_AGENTS,
-)
+from .base_scraper import BaseScraper
+from .constants import USER_AGENTS
 
 
 class MercadoLibreScraperException(Exception):
+    """
+    Custom exception class for MercadoLibreScraper-related errors.
+    """
+
     pass
 
 
@@ -22,9 +24,20 @@ mlb_user_agents = [
 
 
 class MercadoLibreScraper(BaseScraper):
+    """
+    Scraper specifically designed for the Mercado Libre marketplace. It handles the intricacies
+    of navigating and extracting data from Mercado Libre product pages.
+
+    Attributes:
+        search_url (str): Base URL used for constructing search queries.
+    """
+
     search_url: str = Field(default='https://lista.mercadolivre.com.br')
 
     def __init__(self, **data):
+        """
+        Initializes the scraper with Mercado Libre specific settings.
+        """
         super().__init__(
             **data,
             logger_name='mercado-libre-scraper',
@@ -32,23 +45,70 @@ class MercadoLibreScraper(BaseScraper):
         )
 
     def _clean_product_description(self, product_description: str) -> str:
-        product_description = product_description.lower()
-        product_description = ''.join(
-            e for e in product_description if e.isalnum() or e.isspace()
-        )
-        product_description = ' '.join(product_description.split())
+        """
+        Cleans and normalizes the product description for consistent processing.
+
+        Args:
+            product_description (str): The raw product description.
+
+        Returns:
+            str: The cleaned product description.
+
+        Raises:
+            MercadoLibreScraperException: If an error occurs while cleaning the product description.
+        """
+        try:
+            product_description = product_description.lower()
+            product_description = ''.join(
+                e for e in product_description if e.isalnum() or e.isspace()
+            )
+            product_description = ' '.join(product_description.split())
+        except Exception as e:
+            raise MercadoLibreScraperException(
+                f'Error while cleaning product description: {e}'
+            )
 
         return product_description
 
     def _build_product_search_url(self, product_description: str) -> str:
-        product_description = self._clean_product_description(
-            product_description
-        )
-        product_description = product_description.replace(' ', '-')
+        """
+        Constructs a search URL for a given product description.
+
+        Args:
+            product_description (str): The cleaned product description.
+
+        Returns:
+            str: The complete URL to perform a search on Mercado Libre.
+
+        Raises:
+            MercadoLibreScraperException: If an error occurs while building the search URL.
+        """
+
+        try:
+            product_description = self._clean_product_description(
+                product_description
+            )
+            product_description = product_description.replace(' ', '-')
+        except Exception as e:
+            raise MercadoLibreScraperException(
+                f'Error while building product search URL: {e}'
+            )
 
         return f'{self.search_url}/{product_description}'
 
-    async def get_marketplace_id(self, seller_url: str):
+    async def get_marketplace_id(self, seller_url: str) -> str:
+        """
+        Extracts the marketplace ID from a seller URL.
+
+        Args:
+            seller_url (str): The URL of the seller's page.
+
+        Returns:
+            str: The extracted marketplace ID.
+
+        Raises:
+            MercadoLibreScraperException: If the marketplace ID cannot be extracted.
+        """
         marketplace_id = ''
 
         try:
@@ -62,7 +122,16 @@ class MercadoLibreScraper(BaseScraper):
 
         return marketplace_id
 
-    async def get_brand(self):
+    async def get_brand(self) -> str:
+        """
+        Retrieves the brand of the product from the product page.
+
+        Returns:
+            str: The product brand.
+
+        Raises:
+            MercadoLibreScraperException: If the brand cannot be retrieved.
+        """
         brand = ''
 
         try:
@@ -79,7 +148,17 @@ class MercadoLibreScraper(BaseScraper):
 
         return brand
 
-    async def get_description(self):
+    async def get_description(self) -> str:
+        """
+        Retrieves the product description from the product page.
+
+        Returns:
+            str: The product description.
+
+        Raises:
+            MercadoLibreScraperException: If the description cannot be retrieved.
+        """
+
         description = ''
 
         try:
@@ -93,17 +172,40 @@ class MercadoLibreScraper(BaseScraper):
 
         return description
 
-    def _get_price_cents(self, price_container):
-        """Attempt to retrieve the cents part of the price from the price_container."""
+    def _get_price_cents(self, price_container: WebElement) -> str:
+        """
+        Attempt to retrieve the cents part of the price from the price_container.
+
+        Args:
+            price_container (WebElement): The container element containing the price.
+
+        Returns:
+            str: The cents part of the price, if available.
+
+        Raises:
+            MercadoLibreScraperException: If the cents part of the price cannot be retrieved.
+        """
+        price_cents = ''
         try:
             price_cents = price_container.find_element(
                 By.CSS_SELECTOR, 'span.andes-money-amount__cents'
             ).text
-            return price_cents
-        except NoSuchElementException:
-            return ''
+        except Exception as e:
+            raise MercadoLibreScraperException(
+                f'Error while getting price cents: {e}'
+            )
+        return price_cents
 
-    async def get_price(self):
+    async def get_price(self) -> str:
+        """
+        Retrieves the product price from the product page.
+
+        Returns:
+            str: The product price.
+
+        Raises:
+            MercadoLibreScraperException: If the price cannot be retrieved.
+        """
         price = ''
 
         try:
@@ -129,7 +231,19 @@ class MercadoLibreScraper(BaseScraper):
 
         return price
 
-    async def get_seller_id(self, seller_url: str):
+    async def get_seller_id(self, seller_url: str) -> str:
+        """
+        Extracts the seller ID from a seller URL.
+
+        Args:
+            seller_url (str): The URL of the seller's page.
+
+        Returns:
+            str: The extracted seller ID.
+
+        Raises:
+            MercadoLibreScraperException: If the seller ID cannot be extracted.
+        """
         seller_id = ''
 
         try:
@@ -143,7 +257,16 @@ class MercadoLibreScraper(BaseScraper):
 
         return seller_id
 
-    async def get_seller_name(self):
+    async def get_seller_name(self) -> str:
+        """
+        Retrieves the seller name from the product page.
+
+        Returns:
+            str: The seller name.
+
+        Raises:
+            MercadoLibreScraperException: If the seller name cannot be retrieved.
+        """
         seller_name = ''
 
         try:
@@ -160,20 +283,37 @@ class MercadoLibreScraper(BaseScraper):
 
         return seller_name
 
-    def _find_element_by_multiple_xpaths(self, xpaths):
+    def _find_element_by_multiple_xpaths(self, xpaths: tuple) -> WebElement:
         """Try to find an element using multiple XPaths, return the first successful one."""
-        for xpath in xpaths:
-            try:
-                element = self.webdriver.find_element(By.XPATH, xpath)
-                if element:
-                    return element
-            except NoSuchElementException:
-                continue
-        raise NoSuchElementException(
-            'Element not found with any of the provided XPaths.'
-        )
+        element = ()
 
-    async def get_seller_url(self):
+        try:
+            for xpath in xpaths:
+                try:
+                    element = self.webdriver.find_element(By.XPATH, xpath)
+                except NoSuchElementException:
+                    continue
+        except Exception as e:
+            raise MercadoLibreScraperException(
+                f'Error while finding element by multiple XPaths: {e}'
+            )
+        except NoSuchElementException as e:
+            raise MercadoLibreScraperException(
+                f'Element not found by multiple XPaths: {e}'
+            )
+
+        return element
+
+    async def get_seller_url(self) -> str:
+        """
+        Retrieves the seller URL from the product page.
+
+        Returns:
+            str: The seller URL.
+
+        Raises:
+            MercadoLibreScraperException: If the seller URL cannot be retrieved.
+        """
         seller_url = ''
         seller_link_xpaths = (
             "//div[@id='seller_info']/descendant::a[1]",
@@ -192,8 +332,7 @@ class MercadoLibreScraper(BaseScraper):
 
         return seller_url
 
-    async def get_seller_info(self, seller_product_page: str):
-        self.webdriver.get(seller_product_page)
+    async def get_seller_info(self, seller_product_page: str) -> Dict:
         seller_url = ''
 
         seller = {
@@ -208,6 +347,7 @@ class MercadoLibreScraper(BaseScraper):
         }
 
         try:
+            self.webdriver.get(seller_product_page)
             seller_url = await self.get_seller_url()
             seller['product_url'] = seller_product_page
             seller['marketplace_id'] = await self.get_marketplace_id(
@@ -220,17 +360,27 @@ class MercadoLibreScraper(BaseScraper):
             seller['seller_name'] = await self.get_seller_name()
             seller['seller_url'] = seller_url
         except MercadoLibreScraperException as e:
-            self.logger.error(
+            raise MercadoLibreScraperException(
                 f'Error while getting seller info details from {seller_product_page}: {e}'
             )
         except Exception as e:
-            self.logger.error(
+            raise MercadoLibreScraperException(
                 f'Unexpected Error while getting seller info from {seller_product_page}: {e}'
             )
 
         return seller
 
-    async def get_sellers_list(self):
+    async def get_sellers_list(self) -> List[str]:
+        """
+        Retrieves the list of sellers for a given product URL.
+
+        Returns:
+            List: The list of sellers URLs.
+
+        Raises:
+            MercadoLibreScraperException: If the list of sellers cannot be retrieved.
+
+        """
         sellers = []
 
         try:
@@ -249,12 +399,8 @@ class MercadoLibreScraper(BaseScraper):
                 By.CSS_SELECTOR,
                 'section.ui-search-results.ui-search-results--without-disclaimer',
             )
-        except Exception as e:
-            self.logger.error(f'Error while searching for product: {e}')
-            return []
 
-        if products_search_result_section:
-            try:
+            if products_search_result_section:
                 sellers_urls = products_search_result_section.find_elements(
                     By.CSS_SELECTOR,
                     'a.ui-search-item__group__element.ui-search-link__title-card.ui-search-link',
@@ -270,8 +416,9 @@ class MercadoLibreScraper(BaseScraper):
                     )
                     if cleaned_title == cleaned_description:
                         sellers.append(seller_link.get_attribute('href'))
-            except Exception as e:
-                self.logger.error(f'Error while getting sellers list: {e}')
-                return []
+        except Exception as e:
+            raise MercadoLibreScraperException(
+                f'Error while getting sellers list: {e}'
+            )
 
         return sellers

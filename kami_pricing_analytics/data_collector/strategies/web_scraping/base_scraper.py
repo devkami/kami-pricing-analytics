@@ -17,17 +17,29 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium_stealth import stealth
 from webdriver_manager.chrome import ChromeDriverManager
 
-from kami_pricing_analytics.data_collector.strategies.base_strategy import (
-    BaseStrategy,
-)
-from kami_pricing_analytics.data_collector.strategies.web_scraping.constants import (
-    DEFAULT_CRAWL_DELAY,
-    DEFAULT_USER_AGENT,
-    USER_AGENTS,
-)
+from kami_pricing_analytics.data_collector import BaseCollector
+
+from .constants import DEFAULT_CRAWL_DELAY, DEFAULT_USER_AGENT, USER_AGENTS
 
 
-class BaseScraper(BaseStrategy, ABC):
+class BaseScraper(BaseCollector, ABC):
+    """
+    Abstract base class for scraping strategies. Implements common functionalities
+    for web scraping operations, including handling web drivers and HTTP clients
+    with respect for robots.txt constraints.
+
+    Attributes:
+        user_agent (str): Default user agent for HTTP requests.
+        http_client (httpx.AsyncClient): Async HTTP client for making requests.
+        base_url (str): Base URL derived from the product URL.
+        robots_url (str): URL to the robots.txt file.
+        crawl_delay (int): Delay between requests as specified in robots.txt.
+        logger_name (str): Name for the logger.
+        logger (logging.Logger): Logger instance for logging.
+        webdriver (WebDriver): Selenium WebDriver instance.
+        user_agents (list): List of user agents for requests.
+    """
+
     user_agent: str = Field(default=DEFAULT_USER_AGENT)
     http_client: httpx.AsyncClient = Field(default=None)
     base_url: str = Field(default='')
@@ -41,20 +53,26 @@ class BaseScraper(BaseStrategy, ABC):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, **data):
+        """
+        Initializes the scraper with base URL settings and logger configuration.
+        """
         super().__init__(**data)
         self.base_url = self.product_url.scheme + '://' + self.product_url.host
         self.robots_url = f'{self.base_url}/robots.txt'
         self._crawl_delay_fetched = False
         self.set_logger(self.logger_name)
 
-    def _setup_driver(self):
+    def _setup_driver(self) -> WebDriver:
+        """
+        Configures and returns a headless Selenium WebDriver with random user-agent.
+        Includes modifications to evade detection via `selenium_stealth`.
+        """
         options = Options()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
 
         user_agent = random.choice(self.user_agents)
-        print(f'Using User-Agent: {user_agent}')
         options.add_argument(f'user-agent={user_agent}')
 
         driver = webdriver.Chrome(
@@ -72,6 +90,10 @@ class BaseScraper(BaseStrategy, ABC):
         return driver
 
     async def set_webdriver(self) -> WebDriver:
+        """
+        Asynchronously sets up and assigns a WebDriver to this scraper instance.
+        Handles exceptions and logs them appropriately.
+        """
         try:
             with ThreadPoolExecutor() as executor:
                 loop = asyncio.get_running_loop()
@@ -83,6 +105,9 @@ class BaseScraper(BaseStrategy, ABC):
 
     @asynccontextmanager
     async def get_http_client(self):
+        """
+        Context manager for HTTP client to ensure proper header setup and cleanup.
+        """
         headers = {'User-Agent': self.user_agent}
         async with httpx.AsyncClient(headers=headers) as client:
             yield client
@@ -113,6 +138,16 @@ class BaseScraper(BaseStrategy, ABC):
         self.logger = logging.getLogger(logger_name)
 
     async def fetch_content(self, url: str = '') -> str:
+        """
+        Fetches content from the given URL using the configured HTTP client,
+        respecting the crawl delay defined in robots.txt.
+
+        Args:
+            url (str): URL to fetch. If empty, uses the product URL.
+
+        Returns:
+            str: The content of the page.
+        """
         await self._ensure_crawl_delay()
         async with self.get_http_client() as client:
             product_url = url if url else str(self.product_url)
@@ -121,41 +156,75 @@ class BaseScraper(BaseStrategy, ABC):
 
     @abstractmethod
     async def get_marketplace_id(self) -> str:
+        """
+        Abstract method to get the marketplace ID from the scraped content.
+        """
         pass
 
     @abstractmethod
     async def get_brand(self) -> str:
+        """
+        Abstract method to get the brand from the scraped content.
+        """
         pass
 
     @abstractmethod
     async def get_description(self) -> str:
+        """
+        Abstract method to get the description from the scraped content.
+        """
         pass
 
     @abstractmethod
     async def get_price(self) -> str:
+        """
+        Abstract method to get the price from the scraped content.
+        """
         pass
 
     @abstractmethod
     async def get_seller_id(self) -> str:
+        """
+        Abstract method to get the seller ID from the scraped content.
+        """
         pass
 
     @abstractmethod
     async def get_seller_name(self) -> str:
+        """
+        Abstract method to get the seller name from the scraped content.
+        """
         pass
 
     @abstractmethod
     async def get_seller_url(self) -> str:
+        """
+        Abstract method to get the seller URL from the scraped content.
+        """
         pass
 
     @abstractmethod
     async def get_seller_info(self, seller) -> dict:
+        """
+        Abstract method to get the seller info from the scraped content.
+        """
         pass
 
     @abstractmethod
     async def get_sellers_list(self) -> list:
+        """
+        Abstract method to get the sellers list from the scraped content.
+        """
         pass
 
     async def scrap_product(self) -> list:
+        """
+        Orchestrates the scraping process. Initializes WebDriver, fetches sellers,
+        extracts their info, and ensures cleanup. Logs errors during the process.
+
+        Returns:
+            list: List of dictionaries, each containing seller info.
+        """
         try:
             await self.set_webdriver()
             sellers = await self.get_sellers_list()
@@ -180,7 +249,17 @@ class BaseScraper(BaseStrategy, ABC):
         return []
 
     async def execute(self) -> list:
+        """
+        Executes the scraping process and returns the results.
+
+        Returns:
+            list: A list of scraped data.
+        """
         return await self.scrap_product()
 
     async def close_http_client(self):
-        await self.http_client.aclose()
+        """
+        Closes the HTTP client if it has been initialized.
+        """
+        if self.http_client:
+            await self.http_client.aclose()
