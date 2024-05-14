@@ -1,0 +1,25 @@
+site_name: KAMI Pricing Analytics
+repo_url: https://github.com/devkami/kami-pricing-analytics
+repo_name: devkami/kami-pricing-analytics
+edit_uri: tree/main/docs
+
+
+theme:
+  name: material
+  language: pt-BR
+  font:
+    text: 'Roboto'
+    code: 'Roboto Mono'
+  logo: assets/price-tag.png
+  favicon: assets/price-tag.png
+
+
+plugins:
+  - search  
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:        
+          paths: ["kami_pricing_analytics"]
+          rendering:
+            show_source: true
