@@ -1,9 +1,9 @@
 import unittest
+from datetime import datetime, timedelta, timezone
 
 from pydantic import ValidationError
 
-from kami_pricing_analytics.schemas.options import StrategyOptions
-from kami_pricing_analytics.schemas.pricing_research import PricingResearch
+from kami_pricing_analytics.schemas import PricingResearch
 
 
 class TestPricingResearch(unittest.TestCase):
@@ -66,6 +66,18 @@ class TestPricingResearch(unittest.TestCase):
         self.assertEqual(instance.description, 'Updated product')
         self.assertEqual(instance.brand, 'Updated Brand')
         self.assertEqual(instance.category, 'Updated Category')
+        self.assertIsNotNone(instance.conducted_at)
+        self.assertTrue(isinstance(instance.conducted_at, datetime))
+
+    def test_expired_property(self):
+        expired_time = datetime.now(tz=timezone.utc) - timedelta(seconds=3600)
+        instance = PricingResearch(
+            **self.valid_data, conducted_at=expired_time
+        )
+        self.assertTrue(instance.expired)
+
+        instance.conducted_at = datetime.now(tz=timezone.utc)
+        self.assertFalse(instance.expired)
 
 
 if __name__ == '__main__':
