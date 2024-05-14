@@ -27,8 +27,8 @@
 
 ### [] adicionar tratamento de paginação (principalmente no mercado livre)
 
-### [] adicionar método get à API
+### [X] adicionar método get à API
 
-### [] implementar funções de recuperação da informação através do storage
+### [X] implementar funções de recuperação da informação através do storage
 
-### [] implementar um algoritmo inteligente para o get retornar dados do banco de dados de acordo com a última pesquisa, ou realizar uma pesquisa caso a validade da última pesquisa tenha expirado, ou não for encontrado nenhum registro para aquele produto no banco
+### [X] implementar um algoritmo inteligente para o get retornar dados do banco de dados de acordo com a última pesquisa, ou realizar uma pesquisa caso a validade da última pesquisa tenha expirado, ou não for encontrado nenhum registro para aquele produto no banco

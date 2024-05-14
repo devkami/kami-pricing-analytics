@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kami_pricing_analytics"
-version = "0.6.0"
+version = "0.7.0"
 description = "A Scalable FastAPI-based Pricing Analytics API for Research Data Management and Analysis"
 authors = ["Maicon de Menezes <maicondmenezes@gmail.com>"]
 readme = "README.md"
@@ -24,6 +24,10 @@ webdriver-manager = "^4.0.1"
 selenium-stealth = "^1.0.6"
 mysqlclient = "^2.2.4"
 aiomysql = "^0.2.0"
+polars = "^0.20.23"
+xlsx2csv = "^0.8.2"
+aiohttp = "^3.9.5"
+mkdocstrings-python = "^1.10.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -39,6 +43,11 @@ ipykernel = "^6.23.1"
 notebook = "^6.5.4"
 nbformat = "^5.9.0"
 pytest-mock = "^3.12.0"
+
+
+[tool.poetry.group.doc.dependencies]
+mkdocs-material = "^9.5.21"
+mkdocstrings = "^0.25.1"
 
 [tool.pytest.ini_options]
 pythonpath = "."
@@ -56,5 +65,6 @@ lint-review = "blue --check --diff . && isort --check --diff ."
 lint = "blue . && isort ."
 pre_test = "task lint"
 test = "pytest -s -x --cov=kami_pricing_analytics -vv -rs"
-post_test = "coverage html"
+post_test = "coverage html && task clean_pycache"
 show_tree = "tree -R -I '__pycache__' . || echo 'tree command not available. Please install tree or use an equivalent command.'"
+clean_pycache = "find . -type d -name '__pycache__' -exec rm -r {} +"
