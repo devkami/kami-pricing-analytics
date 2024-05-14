@@ -7,7 +7,7 @@
 - [Usage](#usage)
 - [Running Tests](#running_tests)
 - [Contributing](#contributing)
-
+ 
 ## About <a name = "about"></a>
 
 This project is designed to be a scalable Kami Pricing Web Scraping Microservice, initially focused on extracting product seller information from the "Beleza Na Web" marketplace. Built with FastAPI for its asynchronous support and easy-to-use routing, it aims to provide a robust foundation for scraping various marketplaces by extending the service with minimal effort. The project structure supports the SOLID principles, clean code practices, and is ready for Test-Driven Development (TDD) and future scalability considerations, including integration with Celery for task queuing and Traefik for load balancing.
