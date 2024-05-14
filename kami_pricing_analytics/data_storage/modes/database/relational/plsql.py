@@ -1,12 +1,17 @@
 from pydantic import Field
 
-from kami_pricing_analytics.data_storage.modes.database.relational.storage import (
-    DatabaseSettings,
-    DatabaseStorage,
-)
+from .storage import DatabaseSettings, DatabaseStorage
 
 
 class PLSQLSettings(DatabaseSettings):
+    """
+    Configuration settings specific to Oracle PL/SQL database.
+
+    Attributes:
+        db_driver (str): Database driver, defaulting to 'oracle+cx_oracle'.
+        db_port (int): Database port, default is 1521.
+    """
+
     db_driver: str = 'oracle+cx_oracle'
     db_port: int = Field(default=1521)
 
@@ -16,5 +21,7 @@ class PLSQLSettings(DatabaseSettings):
 
 
 class PLSQLStorage(DatabaseStorage):
+    """Storage class for Oracle PL/SQL database using the specified settings."""
+
     def __init__(self, settings: PLSQLSettings):
         super().__init__(settings)
