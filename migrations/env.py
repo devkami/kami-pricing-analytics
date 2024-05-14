@@ -4,25 +4,24 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from sqlalchemy.orm import declarative_base
 
-from kami_pricing_analytics.data_storage.modes.database.relational.models import (
-    Base,
-)
-from kami_pricing_analytics.data_storage.storage_factory import (
+from kami_pricing_analytics.data_storage import (
     DatabaseSettingsFactory,
     StorageModeOptions,
 )
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+# SQLAlchemy Base class for models
+Base = declarative_base()
+
+# Alembic Config object to access .ini configuration values
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
+# Setup logging from config file
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Load storage configuration
+# Load storage mode from configuration
 settings_path = os.path.join(
     os.path.dirname(__file__), '..', 'config', 'settings.cfg'
 )
@@ -35,12 +34,13 @@ database_settings = DatabaseSettingsFactory.get_settings(
     mode=storage_mode_option
 )()
 
-# remove Async library from driver
+# Remove Async library from driver
 database_settings.db_driver = database_settings.db_driver.split('+')[0]
 
 # Dynamically set the SQLAlchemy URL
 config.set_main_option('sqlalchemy.url', database_settings.db_url)
 
+# Target metadata for Alembic, sourced from the Base class of SQLAlchemy models
 target_metadata = Base.metadata
 
 
@@ -90,6 +90,7 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 
+# Determine if running in online or offline mode and call the appropriate function
 if context.is_offline_mode():
     run_migrations_offline()
 else:
