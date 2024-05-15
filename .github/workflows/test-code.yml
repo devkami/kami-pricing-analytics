@@ -21,8 +21,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       
-      - name: Set storage mode to SQLite
-        run: echo -e "[storage]\nmode=0" > config/settings.cfg
+      - name: Set config
+        run: |
+          echo -e "[storage]\nMODE=0" > config/settings.cfg
+          echo -e "[update]\nDELAY=60" >> config/settings.cfg
       
       - name: Build .env file
         run: |

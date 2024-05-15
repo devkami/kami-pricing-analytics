@@ -25,6 +25,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
           poetry install
+      
+      - name: Set config
+        run: |
+          echo -e "[storage]\nMODE=0" > config/settings.cfg
+          echo -e "[update]\nDELAY=60" >> config/settings.cfg
 
       - name: Generate Coverage Report
         run: poetry run task test
