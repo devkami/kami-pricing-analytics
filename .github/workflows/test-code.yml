@@ -41,11 +41,7 @@ jobs:
           poetry install
      
       - name: Run Tests
-        run: poetry run task test
-
-      - name: Temporarily Remove htmlcov/ from .gitignore
-        run: |
-          sed -i '/htmlcov/d' .gitignore
+        run: poetry run task test  
 
       - name: Ensure htmlcov/ Was Created
         run: |
@@ -53,14 +49,16 @@ jobs:
             echo "Erro: htmlcov/ is empty"
             exit 1
           fi
+
+      - name: Move htmlcov/ to temporary directory
+        run: mv htmlcov ../tmp/htmlcov
       
       - name: Deploy Coverage Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./htmlcov
+          publish_dir: ../tmp/htmlcov
           destination_dir: coverage-report
 
-      - name: Restore htmlcov/ to .gitignore
-        run: |
-          echo "htmlcov/" >> .gitignore
+      - name: Clean up temporary directory
+        run: rm -rf ../tmp/htmlcov
