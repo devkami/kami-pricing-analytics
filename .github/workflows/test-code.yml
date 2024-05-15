@@ -50,15 +50,17 @@ jobs:
             exit 1
           fi
 
-      - name: Move htmlcov/ to temporary directory
-        run: mv htmlcov ../htmlcov_temp
+      - name: Set report files to deploy
+        run: |
+          mv htmlcov/ coverage-report/
+          rm -rf coverage-report/.gitingore
       
       - name: Deploy Coverage Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ../htmlcov_temp
+          publish_dir: coverage-report
           destination_dir: coverage-report
 
-      - name: Clean up temporary directory
-        run: rm -rf ../tmp/htmlcov
+      - name: Clean up coverage-report/
+        run: rm -rf coverage-report/
