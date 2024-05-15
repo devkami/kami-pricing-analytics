@@ -39,9 +39,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
           poetry install
+      
       - name: Run Pre-Test Task (Lint Fix)
         run: poetry run task lint
+      
       - name: Run Tests
         run: poetry run task test
+      
       - name: Generate Coverage Report
         run: poetry run task post_test
+
+      - name: Deploy Coverage Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./htmlcov
