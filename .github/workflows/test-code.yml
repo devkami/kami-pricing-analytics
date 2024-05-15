@@ -43,8 +43,16 @@ jobs:
       - name: Run Tests
         run: poetry run task test
 
-      - name: List Content of htmlcov Folder
-        run: ls -la htmlcov
+      - name: Temporarily Remove htmlcov/ from .gitignore
+        run: |
+          sed -i '/htmlcov/d' .gitignore
+
+      - name: Ensure htmlcov/ Was Created
+        run: |
+          if [ ! "$(ls -A htmlcov)" ]; then
+            echo "Erro: htmlcov/ is empty"
+            exit 1
+          fi
       
       - name: Deploy Coverage Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -52,3 +60,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./htmlcov
           destination_dir: coverage-report
+
+      - name: Restore htmlcov/ to .gitignore
+        run: |
+          echo "htmlcov/" >> .gitignore
