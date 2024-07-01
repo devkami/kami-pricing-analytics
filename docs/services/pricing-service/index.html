@@ -14,7 +14,7 @@
       
       
       <link rel="icon" href="../../assets/price-tag.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.23">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
     
     
       
@@ -134,7 +134,7 @@
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Inicializando busca
@@ -1660,7 +1660,16 @@ strategies for data collection and storage mechanisms.</p>
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
-<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PricingService</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PricingService</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Service to manage pricing data research and storage operations, integrating</span>
 <span class="sd">    strategies for data collection and storage mechanisms.</span>
@@ -1792,11 +1801,20 @@ strategies for data collection and storage mechanisms.</p>
                 <span class="n">research_data</span><span class="p">[</span><span class="s1">&#39;strategy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CollectorOptions</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">collector_option</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">name</span>
+
+                <span class="c1"># Convert &#39;conducted_at&#39; to datetime object if it is a string</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">research_data</span><span class="p">[</span><span class="s1">&#39;conducted_at&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">research_data</span><span class="p">[</span><span class="s1">&#39;conducted_at&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">research_data</span><span class="p">[</span><span class="s1">&#39;conducted_at&#39;</span><span class="p">])</span>
+
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">research_data</span><span class="p">)</span>
                 <span class="n">is_result_stored</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">PricingServiceException</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Value Error while storing research: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">DataError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PricingServiceException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Data Error while storing research: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">PricingServiceException</span><span class="p">(</span>
@@ -2039,16 +2057,7 @@ strategies for data collection and storage mechanisms.</p>
 
             <details class="quote">
               <summary>Source code in <code>kami_pricing_analytics/services/pricing_service.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">176</span>
 <span class="normal">177</span>
 <span class="normal">178</span>
 <span class="normal">179</span>
@@ -2068,7 +2077,16 @@ strategies for data collection and storage mechanisms.</p>
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
-<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">async</span> <span class="k">def</span> <span class="nf">retrieve_research</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">async</span> <span class="k">def</span> <span class="nf">retrieve_research</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieves the research data based on specified criteria and updates the research attribute.</span>
 
@@ -2435,7 +2453,16 @@ strategies for data collection and storage mechanisms.</p>
 <span class="normal">162</span>
 <span class="normal">163</span>
 <span class="normal">164</span>
-<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">async</span> <span class="k">def</span> <span class="nf">store_research</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">async</span> <span class="k">def</span> <span class="nf">store_research</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Stores the research data using the configured storage mode if storage is enabled.</span>
 
@@ -2456,11 +2483,20 @@ strategies for data collection and storage mechanisms.</p>
             <span class="n">research_data</span><span class="p">[</span><span class="s1">&#39;strategy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CollectorOptions</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">collector_option</span>
             <span class="p">)</span><span class="o">.</span><span class="n">name</span>
+
+            <span class="c1"># Convert &#39;conducted_at&#39; to datetime object if it is a string</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">research_data</span><span class="p">[</span><span class="s1">&#39;conducted_at&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">research_data</span><span class="p">[</span><span class="s1">&#39;conducted_at&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">research_data</span><span class="p">[</span><span class="s1">&#39;conducted_at&#39;</span><span class="p">])</span>
+
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">research_data</span><span class="p">)</span>
             <span class="n">is_result_stored</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">PricingServiceException</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Value Error while storing research: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="n">DataError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">PricingServiceException</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Data Error while storing research: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">PricingServiceException</span><span class="p">(</span>
@@ -2563,7 +2599,7 @@ strategies for data collection and storage mechanisms.</p>
     <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.ebd0bdb7.min.js"></script>
+      <script src="../../assets/javascripts/bundle.ad660dcc.min.js"></script>
       
     
   </body>
