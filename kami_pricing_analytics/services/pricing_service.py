@@ -1,5 +1,5 @@
 import json
-
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from kami_pricing_analytics.data_collector import (
@@ -9,7 +9,7 @@ from kami_pricing_analytics.data_collector import (
 )
 from kami_pricing_analytics.data_storage import BaseStorage, StorageFactory
 from kami_pricing_analytics.schemas import PricingResearch
-
+from asyncpg.exceptions import DataError
 
 class PricingServiceException(Exception):
     """
@@ -151,11 +151,20 @@ class PricingService(BaseModel):
                 research_data['strategy'] = CollectorOptions(
                     self.collector_option
                 ).name
+
+                # Convert 'conducted_at' to datetime object if it is a string
+                if isinstance(research_data['conducted_at'], str):
+                    research_data['conducted_at'] = datetime.fromisoformat(research_data['conducted_at'])
+
                 await self.storage.save(research_data)
                 is_result_stored = True
         except ValueError as e:
             raise PricingServiceException(
                 f'Value Error while storing research: {e}'
+            )
+        except DataError as e:
+            raise PricingServiceException(
+                f'Data Error while storing research: {e}'
             )
         except Exception as e:
             raise PricingServiceException(
