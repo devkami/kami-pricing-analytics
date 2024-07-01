@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kami_pricing_analytics"
-version = "0.7.0"
+version = "0.7.2"
 description = "A Scalable FastAPI-based Pricing Analytics API for Research Data Management and Analysis"
 authors = ["Maicon de Menezes <maicondmenezes@gmail.com>"]
 readme = "README.md"
@@ -22,13 +22,16 @@ aiosqlite = "^0.20.0"
 selenium = "^4.18.1"
 webdriver-manager = "^4.0.1"
 selenium-stealth = "^1.0.6"
-mysqlclient = "^2.2.4"
 aiomysql = "^0.2.0"
 polars = "^0.20.23"
 xlsx2csv = "^0.8.2"
 aiohttp = "^3.9.5"
 mkdocstrings-python = "^1.10.0"
+ipykernel = "^6.29.4"
 
+numpy = "^1.26.4"
+matplotlib = "^3.9.0"
+pyarrow = "^16.1.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
