@@ -1,5 +1,7 @@
 import json
 from datetime import datetime
+
+from asyncpg.exceptions import DataError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from kami_pricing_analytics.data_collector import (
@@ -9,7 +11,7 @@ from kami_pricing_analytics.data_collector import (
 )
 from kami_pricing_analytics.data_storage import BaseStorage, StorageFactory
 from kami_pricing_analytics.schemas import PricingResearch
-from asyncpg.exceptions import DataError
+
 
 class PricingServiceException(Exception):
     """
@@ -154,7 +156,9 @@ class PricingService(BaseModel):
 
                 # Convert 'conducted_at' to datetime object if it is a string
                 if isinstance(research_data['conducted_at'], str):
-                    research_data['conducted_at'] = datetime.fromisoformat(research_data['conducted_at'])
+                    research_data['conducted_at'] = datetime.fromisoformat(
+                        research_data['conducted_at']
+                    )
 
                 await self.storage.save(research_data)
                 is_result_stored = True

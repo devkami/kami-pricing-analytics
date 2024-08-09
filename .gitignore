@@ -174,3 +174,4 @@ poetry.lock
 codealike.json
 
 .vscode
+.tool-versions

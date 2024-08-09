@@ -11,7 +11,7 @@ from kami_pricing_analytics.interface.api import PricingResearchRequest
 research_app = FastAPI(
     title='KAMI-Pricing Analytics API',
     description="API to conduct pricing research over a product's URL.",
-    version='0.6.1',
+    version='0.8.2',
 )
 
 # Router for managing API endpoints
@@ -43,15 +43,15 @@ class PricingResearchPayload(BaseModel):
     status_code=status.HTTP_200_OK,
     summary='Conduct a pricing research over a product.',
     description="""
-    Conduct a pricing research over a product for a given URL on marketplace. or The Market Place Name and the Marketplace ID for that product. The results is a list of sellers and their prices for this product. It's also allows to store the results in a database. and choose the strategy to be used to collect the data. 
-    
+    Conduct a pricing research over a product for a given URL on marketplace. or The Market Place Name and the Marketplace ID for that product. The results is a list of sellers and their prices for this product. It's also allows to store the results in a database. and choose the strategy to be used to collect the data.
+
     Payload
     - `url`: URL of the product on the marketplace.
     - `marketplace`: Name of the marketplace.
-      Marketplaces supported: 
+      Marketplaces supported:
         - beleza_na_web: Beleza na Web
-        - amazon: Amazon 
-        - mercado_livre: Mercado Livre 
+        - amazon: Amazon
+        - mercado_livre: Mercado Livre
     - `marketplace_id`: ID of the product on the marketplace.
     - `strategy`: Strategy to be used to collect the data.
       Strategies supported:
@@ -95,9 +95,9 @@ async def post_research(payload: PricingResearchPayload) -> Dict[str, Any]:
     Retrieve the results of a pricing research for a given product. The results is a list of sellers and their prices for this product.
     Query Parameters:
     - `marketplace`: Name of the marketplace.
-      Marketplaces supported: 
+      Marketplaces supported:
         - beleza_na_web: Beleza na Web
-        - amazon: Amazon 
+        - amazon: Amazon
         - mercado_livre: Mercado Livre
     - `marketplace_id`: ID of the product on the marketplace.
     """,
