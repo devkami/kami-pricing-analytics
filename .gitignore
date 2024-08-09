@@ -175,3 +175,5 @@ codealike.json
 
 .vscode
 .tool-versions
+*.xlsx
+*.deb

@@ -26,7 +26,7 @@ jobs:
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
           echo "DB_HOST=mysql" >> .env
           echo "DB_PORT=3306" >> .env
-          docker-compose up --build -d mysql pricing-analytics
+          docker compose up --build -d mysql pricing-analytics
 
       - name: Check if container is healthy
         run: |
