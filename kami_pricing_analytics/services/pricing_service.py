@@ -8,6 +8,7 @@ from kami_pricing_analytics.data_collector import (
     BaseCollector,
     CollectorFactory,
     CollectorOptions,
+    MarketPlaceOptions,
 )
 from kami_pricing_analytics.data_storage import BaseStorage, StorageFactory
 from kami_pricing_analytics.schemas import PricingResearch
@@ -63,10 +64,20 @@ class PricingService(BaseModel):
             PricingService: The instance of this service with an updated strategy.
         """
         try:
-            self.strategy = CollectorFactory.get_strategy(
-                collector_option=self.collector_option,
-                product_url=str(self.research.url),
-            )
+            if self.research.url:
+                self.strategy = CollectorFactory.get_strategy(
+                    collector_option=self.collector_option,
+                    product_url=str(self.research.url),
+                )
+            elif self.research.marketplace:
+                self.strategy = CollectorFactory.get_strategy(
+                    collector_option=self.collector_option,
+                    marketplace=self.research.marketplace,
+                )
+            else:
+                raise PricingServiceException(
+                    'Product URL or marketplace are required to set up the strategy'
+                )
         except ValueError as e:
             raise PricingServiceException(
                 f'Value Error while setting strategy: {e}'
@@ -170,10 +181,6 @@ class PricingService(BaseModel):
             raise PricingServiceException(
                 f'Data Error while storing research: {e}'
             )
-        except Exception as e:
-            raise PricingServiceException(
-                f'Unexpected error while storing research: {e}'
-            )
 
         return is_result_stored
 
@@ -188,22 +195,37 @@ class PricingService(BaseModel):
             bool: True if the retrieval was successful, False otherwise.
         """
         is_research_retrieved = False
-        try:
+        beleza_na_web = MarketPlaceOptions.BELEZA_NA_WEB.name.lower()
 
+        criteria = {}
+
+        if self.research.url:
+            criteria['url'] = str(self.research.url)
+        else:
             criteria = {
                 'marketplace': self.research.marketplace,
                 'marketplace_id': self.research.marketplace_id,
             }
-            results = await self.storage.retrieve(criteria)
-            if results:
-                research_data = results[0]
-                self.research = PricingResearch(**research_data)
-                is_research_retrieved = True
-        except ValueError as e:
-            raise ValueError(f'Value Error while retrieving research: {e}')
-        except Exception as e:
+        results = await self.storage.retrieve(criteria)
+
+        if results:
+            research_data = results[0]
+            self.research = PricingResearch(**research_data)
+            is_research_retrieved = True
+
+            if (
+                self.research.marketplace == beleza_na_web
+                and self.research.expired
+            ):
+                self.research.url = research_data.get('url')
+
+        if (
+            not is_research_retrieved
+            and self.research.marketplace == beleza_na_web
+            and not self.research.url
+        ):
             raise PricingServiceException(
-                f'Unexpected error while retrieving research: {e}'
+                'Product URL is required for Beleza na Web marketplace if it has never been searched for before.'
             )
 
         return is_research_retrieved

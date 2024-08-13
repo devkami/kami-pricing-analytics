@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch
 
 from kami_pricing_analytics.data_collector import CollectorOptions
@@ -10,7 +11,10 @@ from kami_pricing_analytics.data_storage.modes.database.relational import (
     SQLiteStorage,
 )
 from kami_pricing_analytics.schemas import PricingResearch
-from kami_pricing_analytics.services import PricingService
+from kami_pricing_analytics.services import (
+    PricingService,
+    PricingServiceException,
+)
 
 
 class TestPricingService(unittest.IsolatedAsyncioTestCase):
@@ -168,6 +172,91 @@ class TestPricingService(unittest.IsolatedAsyncioTestCase):
         await self.pricing_service.store_research()
 
         mock_save.assert_not_called()
+
+    @patch(
+        'kami_pricing_analytics.data_storage.modes.database.relational.sqlite.SQLiteStorage.retrieve',
+        new_callable=AsyncMock,
+    )
+    async def test_retrieve_research_with_url_success(self, mock_retrieve):
+        mock_retrieve.return_value = [
+            {
+                'sku': '',
+                'marketplace': 'BELEZA_NA_WEB',
+                'marketplace_id': '12345',
+                'brand': 'Test Brand',
+                'description': 'Test Description',
+                'category': 'Cosmetics',
+                'url': 'https://www.belezanaweb.com.br/product',
+            }
+        ]
+        self.pricing_service.research.url = (
+            'https://www.belezanaweb.com.br/product'
+        )
+        await self.pricing_service.retrieve_research()
+
+        mock_retrieve.assert_awaited_once_with(
+            {'url': 'https://www.belezanaweb.com.br/product'}
+        )
+
+        self.assertEqual(
+            self.pricing_service.research.marketplace, 'BELEZA_NA_WEB'
+        )
+        self.assertEqual(self.pricing_service.research.marketplace_id, '12345')
+        self.assertEqual(self.pricing_service.research.brand, 'Test Brand')
+        self.assertEqual(
+            self.pricing_service.research.description, 'Test Description'
+        )
+        self.assertEqual(self.pricing_service.research.category, 'Cosmetics')
+
+    @patch(
+        'kami_pricing_analytics.data_storage.modes.database.relational.sqlite.SQLiteStorage.retrieve',
+        new_callable=AsyncMock,
+    )
+    async def test_retrieve_research_without_url_for_beleza_na_web_raises_error(
+        self, mock_retrieve
+    ):
+        mock_retrieve.return_value = []
+        self.pricing_service.research.marketplace = 'beleza_na_web'
+        self.pricing_service.research.marketplace_id = '12345'
+        self.pricing_service.research.url = None
+
+        with self.assertRaises(PricingServiceException) as context:
+            await self.pricing_service.retrieve_research()
+
+        self.assertIn('Product URL is required', str(context.exception))
+        mock_retrieve.assert_awaited_once()
+
+    @patch(
+        'kami_pricing_analytics.data_storage.modes.database.relational.sqlite.SQLiteStorage.retrieve',
+        new_callable=AsyncMock,
+    )
+    async def test_retrieve_research_expired_for_beleza_na_web_uses_stored_url(
+        self, mock_retrieve
+    ):
+        mock_retrieve.return_value = [
+            {
+                'sku': '',
+                'marketplace': 'BELEZA_NA_WEB',
+                'marketplace_id': '12345',
+                'brand': 'Test Brand',
+                'description': 'Test Description',
+                'category': 'Cosmetics',
+                'url': 'https://www.belezanaweb.com.br/product',
+                'conducted_at': datetime.now(tz=timezone.utc)
+                - timedelta(days=1),
+            }
+        ]
+        self.pricing_service.research.marketplace = 'beleza_na_web'
+        self.pricing_service.research.marketplace_id = '12345'
+        self.pricing_service.research.url = None
+
+        await self.pricing_service.retrieve_research()
+
+        mock_retrieve.assert_awaited_once()
+        self.assertEqual(
+            str(self.pricing_service.research.url),
+            'https://www.belezanaweb.com.br/product',
+        )
 
 
 if __name__ == '__main__':

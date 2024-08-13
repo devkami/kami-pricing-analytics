@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Optional
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class CollectorOptions(Enum):
@@ -128,8 +129,8 @@ class BaseCollector(BaseModel, ABC):
         execute(): Abstract method that must be implemented by subclasses. This method is intended to carry out the specific actions of the strategy.
     """
 
-    product_url: HttpUrl
-    sku: str = None
+    product_url: Optional[HttpUrl] = Field(default=None)
+    sku: Optional[str] = None
 
     @abstractmethod
     def execute(self) -> dict:

@@ -173,27 +173,10 @@ class PricingResearchRequest(BaseModel):
         Raises:
             PricingResearchRequestError: If an error occurs during retrieval or processing.
         """
+        await self.service.retrieve_research()
 
-        response = []
+        if not self.service.research.sellers or self.service.research.expired:
+            self.store_result = True
+            await self.post()
 
-        try:
-            await self.service.retrieve_research()
-
-            if (
-                not self.service.research.sellers
-                or self.service.research.expired
-            ):
-                self.store_result = True
-                await self.post()
-
-            reponse = self.service.research.sellers
-        except ValueError as e:
-            raise PricingResearchRequestException(
-                f'Value Error while getting research: {e}'
-            )
-        except Exception as e:
-            raise PricingResearchRequestException(
-                f'Unexpected error while getting research: {e}'
-            )
-
-        return response
+        return self.service.research.sellers

@@ -1,4 +1,4 @@
-from .base_collector import CollectorOptions
+from .base_collector import CollectorOptions, MarketPlaceOptions
 from .strategies.web_scraping import (
     AmazonScraper,
     BaseScraper,
@@ -19,7 +19,9 @@ class CollectorFactory:
     """
 
     @staticmethod
-    def get_strategy(collector_option: int, product_url: str) -> BaseScraper:
+    def get_strategy(
+        collector_option: int, product_url: str = None, marketplace: str = None
+    ) -> BaseScraper:
         """
         Determines the appropriate scraper instance to use based on the marketplace
         in the product URL and the selected strategy option.
@@ -27,6 +29,7 @@ class CollectorFactory:
         Args:
             collector_option (int): Numeric identifier for the scraping strategy to use.
             product_url (str): URL of the product to be scraped.
+            marketplace (str): Name of the marketplace to be scraped.
 
         Returns:
             strategy (BaseScraper): An instance of a scraper appropriate for the identified marketplace.
@@ -37,16 +40,31 @@ class CollectorFactory:
         """
 
         strategy = BaseScraper
+        marketplace = marketplace.upper() if marketplace else None
 
         if collector_option != CollectorOptions.WEB_SCRAPING.value:
             raise ValueError('Unsupported strategy option')
 
-        if 'belezanaweb' in product_url:
+        if not product_url and not marketplace:
+            raise ValueError(
+                'Product URL or marketplace are required to set up the scraper'
+            )
+
+        if (product_url and 'belezanaweb' in product_url) or (
+            marketplace == MarketPlaceOptions.BELEZA_NA_WEB.name
+        ):
             strategy = BelezaNaWebScraper(product_url=product_url)
-        elif 'amazon' in product_url:
+
+        elif (product_url and 'amazon' in product_url) or (
+            marketplace == MarketPlaceOptions.AMAZON.name
+        ):
             strategy = AmazonScraper(product_url=product_url)
-        elif 'mercadolivre' in product_url:
+
+        elif (product_url and 'mercadolivre' in product_url) or (
+            marketplace == MarketPlaceOptions.MERCADO_LIVRE.name
+        ):
             strategy = MercadoLibreScraper(product_url=product_url)
+
         else:
             raise ValueError('Unsupported marketplace for web scraping')
 
