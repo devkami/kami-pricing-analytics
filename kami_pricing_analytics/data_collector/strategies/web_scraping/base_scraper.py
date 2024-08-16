@@ -42,14 +42,13 @@ class BaseScraper(BaseCollector, ABC):
 
     user_agent: str = Field(default=DEFAULT_USER_AGENT)
     http_client: httpx.AsyncClient = Field(default=None)
-    base_url: str = Field(default='')
-    robots_url: str = Field(default='')
+    base_url: str = Field(default=None)
+    robots_url: str = Field(default=None)
     crawl_delay: int = Field(default=DEFAULT_CRAWL_DELAY)
     logger_name: str = Field(default='pricing-scraper')
     logger: logging.Logger = Field(default=None)
     webdriver: WebDriver = Field(default=None)
     user_agents: list = USER_AGENTS
-
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, **data):
@@ -57,10 +56,24 @@ class BaseScraper(BaseCollector, ABC):
         Initializes the scraper with base URL settings and logger configuration.
         """
         super().__init__(**data)
-        self.base_url = self.product_url.scheme + '://' + self.product_url.host
-        self.robots_url = f'{self.base_url}/robots.txt'
+        if self.product_url:
+            self.base_url = self._get_base_url()
+            self.robots_url = f'{self.base_url}/robots.txt'
+        else:
+            self.base_url = None
+            self.robots_url = None
+
         self._crawl_delay_fetched = False
         self.set_logger(self.logger_name)
+
+    def _get_base_url(self) -> str:
+        """
+        Extracts the base URL from the product URL.
+        """
+        if self.product_url:
+            parsed_url = urlparse(str(self.product_url))
+            return f'{parsed_url.scheme}://{parsed_url.netloc}'
+        return ''
 
     def _setup_driver(self) -> WebDriver:
         """

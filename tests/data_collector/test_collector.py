@@ -47,6 +47,27 @@ class TestCollectorFactory(unittest.TestCase):
                 'https://www.amazon.com.br/prodcut',
             )
 
+    def test_get_amazon_by_marketplace(self):
+        scraper = CollectorFactory.get_strategy(
+            CollectorOptions.WEB_SCRAPING.value,
+            marketplace='amazon',
+        )
+        self.assertIsInstance(scraper, AmazonScraper)
+
+    def test_get_beleza_na_web_by_marketplace(self):
+        scraper = CollectorFactory.get_strategy(
+            CollectorOptions.WEB_SCRAPING.value,
+            marketplace='beleza_na_web',
+        )
+        self.assertIsInstance(scraper, BelezaNaWebScraper)
+
+    def test_get_mercado_livre_by_marketplace(self):
+        scraper = CollectorFactory.get_strategy(
+            CollectorOptions.WEB_SCRAPING.value,
+            marketplace='mercado_livre',
+        )
+        self.assertIsInstance(scraper, MercadoLibreScraper)
+
 
 if __name__ == '__main__':
     unittest.main()
